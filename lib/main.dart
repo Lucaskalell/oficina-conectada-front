@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:oficina_conectada_front/home_page/home_page.dart';
+import 'package:oficina_conectada_front/login/login_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,22 +13,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Oficina Conectada',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const LoginPage(),
-    );
-  }
-}
+      theme: ThemeData.dark(),
+      debugShowCheckedModeBanner: false,
+      initialRoute: '/login',
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Aqui será a Tela de Login')),
+      routes: {
+        '/login': (context) => const LoginPage(),
+        '/home': (context) => const HomePage(),
+      },
     );
   }
 }

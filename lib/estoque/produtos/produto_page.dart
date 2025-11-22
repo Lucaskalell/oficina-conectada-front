@@ -1,21 +1,16 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:oficina_conectada_front/estoque/produtos/produto_bloc.dart';
 import 'package:oficina_conectada_front/estoque/produtos/produto_repository.dart';
 
-import '../model/produto.dart';
+import 'package:oficina_conectada_front/common/widget/toast/custom_toast.dart';
+import 'package:oficina_conectada_front/estoque/model/produto.dart';
 
 class ProdutoPage extends StatefulWidget {
   final int subCategoriaId;
   final String subCategoriaNome;
 
-  const ProdutoPage({
-    super.key,
-    required this.subCategoriaId,
-    required this.subCategoriaNome,
-  });
+  const ProdutoPage({super.key, required this.subCategoriaId, required this.subCategoriaNome});
 
   @override
   State<ProdutoPage> createState() => _ProdutoPageState();
@@ -97,9 +92,20 @@ class _ProdutoPageState extends State<ProdutoPage> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
               onPressed: () {
-                // TODO: Chamar o BLoC para salvar o produto!
-                // (Precisamos criar o evento AdicionarProduto no BLoC primeiro)
-                print("Salvando produto: ${_nomeController.text}");
+                if (_nomeController.text.isEmpty) return;
+                final novoProduto = Produto(
+                  id: 0,
+                  nome: _nomeController.text,
+                  quantidadeEmEstoque: int.tryParse(_quantidadeController.text) ?? 0,
+                  precoCusto: double.tryParse(_precoCustoController.text) ?? 0.0,
+                  precoVenda: double.tryParse(_precoVendaController.text) ?? 0.0,
+                  descricao: null,
+                );
+                _bloc.add(AdicionarProduto(novoProduto, widget.subCategoriaId));
+                _nomeController.clear();
+                _quantidadeController.clear();
+                _precoCustoController.clear();
+                _precoVendaController.clear();
                 Navigator.pop(context);
               },
               child: const Text('Salvar', style: TextStyle(color: Colors.white)),
@@ -120,22 +126,41 @@ class _ProdutoPageState extends State<ProdutoPage> {
         iconTheme: const IconThemeData(color: Colors.white),
         titleTextStyle: const TextStyle(color: Colors.white, fontSize: 20),
       ),
-
       floatingActionButton: FloatingActionButton(
         onPressed: _mostrarModalAdicionar,
         backgroundColor: Colors.blueAccent,
         child: const Icon(Icons.add_circle, color: Colors.white),
       ),
-
-      body: BlocBuilder<ProdutoBloc, ProdutoState>(
+      body: BlocConsumer<ProdutoBloc, ProdutoState>(
         bloc: _bloc,
+        listener: (context, state) {
+          if (state is ProdutoError) {
+            CustomToast.show(
+              context,
+              message: state.message,
+              type :ToastType.error,
+            );
+          }
+        },
         builder: (context, state) {
           if (state is ProdutoLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is ProdutoSuccess) {
             return _buildList(state.produtos);
           } else if (state is ProdutoError) {
-            return Center(child: Text("Erro: ${state.message}", style: const TextStyle(color: Colors.red)));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 60, color: Colors.grey.shade700),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Não foi possível carregar os dados.',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            );
           }
           return const SizedBox.shrink();
         },
@@ -145,7 +170,9 @@ class _ProdutoPageState extends State<ProdutoPage> {
 
   Widget _buildList(List<Produto> lista) {
     if (lista.isEmpty) {
-      return const Center(child: Text("Nenhum produto encontrado.", style: TextStyle(color: Colors.grey)));
+      return const Center(
+        child: Text('Nenhum produto encontrado.', style: TextStyle(color: Colors.grey)),
+      );
     }
     return ListView.builder(
       itemCount: lista.length,
@@ -155,15 +182,18 @@ class _ProdutoPageState extends State<ProdutoPage> {
           color: Colors.grey.shade900,
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: ListTile(
-            title: Text(prod.nome, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            title: Text(
+              prod.nome,
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
             subtitle: Text(
-              "Estoque: ${prod.quantidadeEmEstoque} | Preço: R\$ ${prod.precoVenda}",
+              'Estoque: ${prod.quantidadeEmEstoque} | Preço: R\$ ${prod.precoVenda.toStringAsFixed(2)}',
               style: TextStyle(color: Colors.grey.shade400),
             ),
-            leading: const Icon(Icons.build, color: Colors.orange),
+            leading: const Icon(Icons.build_circle_outlined, color: Colors.orangeAccent),
             trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
             onTap: () {
-              // Detalhes
+              // Navegar para detalhes do produto
             },
           ),
         );

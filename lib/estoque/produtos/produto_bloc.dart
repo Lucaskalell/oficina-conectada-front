@@ -1,9 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:oficina_conectada_front/estoque/produtos/produto_repository.dart';
 
 
-import '../model/produto.dart';
+import 'package:oficina_conectada_front/estoque/model/produto.dart';
 
 part 'produto_event.dart';
 part 'produto_state.dart';
@@ -19,6 +20,19 @@ class ProdutoBloc extends Bloc<ProdutoEvent, ProdutoState> {
         emit(ProdutoSuccess(lista));
       } catch (e) {
         emit(ProdutoError(e.toString()));
+      }
+    });
+
+    on<AdicionarProduto>((event, emit) async {
+      emit(ProdutoLoading());
+      try{
+        await repository.criarProduto(event.produto, event.subCategoriaId);
+        final listaAtualizada = await repository.buscarProdutos(event.subCategoriaId);
+        emit(ProdutoSuccess(listaAtualizada));
+      }catch(e,stackTrace){
+        debugPrint('erro aqui :$e');
+        debugPrint('segue o erro :$stackTrace');
+        emit(ProdutoError('Erro ao adicionar produto:'));
       }
     });
   }

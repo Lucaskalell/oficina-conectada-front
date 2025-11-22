@@ -25,4 +25,14 @@ class Produto {
       quantidadeEmEstoque: (json['quantidadeEmEstoque'] as num?)?.toInt() ?? 0,
     );
   }
+
+  Map<String,dynamic>toJson(){
+    return{
+      'nome': nome,
+      'descricao': descricao,
+      'precoCusto': precoCusto,
+      'precoVenda': precoVenda,
+      'quantidadeEmEstoque': quantidadeEmEstoque,
+    };
+  }
 }

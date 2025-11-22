@@ -15,3 +15,13 @@ class BuscarProdutos extends ProdutoEvent{
   @override
   List<Object> get props => [subCategoriaId];
 }
+
+
+
+class AdicionarProduto extends ProdutoEvent{
+  final Produto produto;
+  final int subCategoriaId;
+  const AdicionarProduto(this.produto, this.subCategoriaId);
+  @override
+  List<Object> get props => [produto, subCategoriaId];
+}

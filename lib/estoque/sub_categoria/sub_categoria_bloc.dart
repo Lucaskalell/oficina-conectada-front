@@ -10,23 +10,16 @@ part 'sub_categoria_event.dart';
 part 'sub_categoria_state.dart';
 
 class SubCategoriaBloc extends Bloc<SubCategoriaEvent, SubCategoriaState> {
-  final SubCategoriaRepository _repository;
-
-  SubCategoriaBloc(this._repository) : super(SubCategoriaInitial()) {
-    on<BuscarSubCategoriasIniciado>(_onBuscarSubCategoriasIniciado);
-  }
-
-  Future<void> _onBuscarSubCategoriasIniciado(
-      BuscarSubCategoriasIniciado event,
-      Emitter<SubCategoriaState> emit,
-      ) async {
-    emit(SubCategoriaLoading());
-    try {
-      final subCategorias =
-      await _repository.buscarSubCategorias(event.categoriaId);
-      emit(SubCategoriaSucesso(subCategorias));
-    } catch (e) {
-      emit(SubCategoriaErro(e.toString()));
-    }
+  final SubCategoriaRepository repository;
+  SubCategoriaBloc(this.repository) : super(SubCategoriaInitial()) {
+    on<BuscarSubCategoriasIniciado>((event,emit,) async {
+      emit(SubCategoriaLoading());
+      try {
+        final subCategorias = await repository.buscarSubCategorias(event.categoriaId);
+        emit(SubCategoriaSucesso(subCategorias));
+      } catch (e) {
+        emit(SubCategoriaErro(e.toString()));
+      }
+    });
   }
 }

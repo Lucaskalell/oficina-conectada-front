@@ -9,20 +9,20 @@ part 'estoque_event.dart';
 part 'estoque_state.dart';
 
 class EstoqueBloc extends Bloc<EstoqueEvent, EstoqueState> {
-  final EstoqueRepository _estoqueRepository;
+  final EstoqueRepository estoqueRepository;
 
-  EstoqueBloc(this._estoqueRepository) : super(EstoqueInitial()) {
-    on<BuscarCategoriasIniciado>(_onBuscarCategoriasIniciado);
+  EstoqueBloc(this.estoqueRepository) : super(EstoqueInitial()) {
+
+
+    on<BuscarCategoriasIniciado>((event, emit) async {
+      emit(EstoqueLoading());
+      try {
+        final categorias = await estoqueRepository.buscarCategorias();
+
+        emit(EstoqueSucesso(categorias));
+      } catch (e) {
+        emit(EstoqueErro(e.toString()));
+      }
+    });
   }
-  Future<void> _onBuscarCategoriasIniciado(BuscarCategoriasIniciado event, Emitter<EstoqueState> emit) async {
-    emit(EstoqueLoading());
-    try {
-      final categorias = await _estoqueRepository.buscarCategorias();
-
-      emit(EstoqueSucesso(categorias));
-    } catch (e) {
-      emit(EstoqueErro(e.toString()));
-    }
-  }
-
 }

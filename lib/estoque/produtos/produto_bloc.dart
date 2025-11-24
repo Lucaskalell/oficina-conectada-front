@@ -12,6 +12,8 @@ class ProdutoBloc extends Bloc<ProdutoEvent, ProdutoState> {
   final ProdutoRepository produtoRepository;
 
   ProdutoBloc(this.produtoRepository) : super(ProdutoInitial()) {
+
+
     on<BuscarProdutos>((event, emit) async {
       emit(ProdutoLoading());
       try {

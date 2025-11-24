@@ -31,56 +31,36 @@ class _ProdutoPageState extends State<ProdutoPage> {
     _bloc.add(BuscarProdutos(widget.subCategoriaId));
   }
 
-  void _mostrarModalAdicionar() {
+    _mostrarModal({Produto? produtoParaEditar}) {
+    final isEdicao = produtoParaEditar != null;
+    if (isEdicao) {
+      _nomeController.text = produtoParaEditar.nome;
+      _quantidadeController.text = produtoParaEditar.quantidadeEmEstoque.toString();
+      _precoCustoController.text = produtoParaEditar.precoCusto.toString();
+      _precoVendaController.text = produtoParaEditar.precoVenda.toString();
+    } else {
+      _nomeController.clear();
+      _quantidadeController.clear();
+      _precoCustoController.clear();
+      _precoVendaController.clear();
+    }
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           backgroundColor: Colors.grey.shade900,
-          title: const Text('Adicionar Novo Produto', style: TextStyle(color: Colors.white)),
+          title: Text(isEdicao ? 'Editar Produto' : 'Adicionar Novo Produto',
+              style: const TextStyle(color: Colors.white)),
+
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(
-                  controller: _nomeController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
-                    labelText: 'Nome do Produto',
-                    labelStyle: TextStyle(color: Colors.grey),
-                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                  ),
-                ),
-                TextField(
-                  controller: _quantidadeController,
-                  style: const TextStyle(color: Colors.white),
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Quantidade Inicial',
-                    labelStyle: TextStyle(color: Colors.grey),
-                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                  ),
-                ),
-                TextField(
-                  controller: _precoCustoController,
-                  style: const TextStyle(color: Colors.white),
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Preço de Custo (R\$)',
-                    labelStyle: TextStyle(color: Colors.grey),
-                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                  ),
-                ),
-                TextField(
-                  controller: _precoVendaController,
-                  style: const TextStyle(color: Colors.white),
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Preço de Venda (R\$)',
-                    labelStyle: TextStyle(color: Colors.grey),
-                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                  ),
-                ),
+                TextField(controller: _nomeController, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Nome', labelStyle: TextStyle(color: Colors.grey))),
+                TextField(controller: _quantidadeController, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Qtd', labelStyle: TextStyle(color: Colors.grey))),
+                TextField(controller: _precoCustoController, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Custo', labelStyle: TextStyle(color: Colors.grey))),
+                TextField(controller: _precoVendaController, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Venda', labelStyle: TextStyle(color: Colors.grey))),
               ],
             ),
           ),
@@ -92,23 +72,28 @@ class _ProdutoPageState extends State<ProdutoPage> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
               onPressed: () {
-                if (_nomeController.text.isEmpty) return;
-                final novoProduto = Produto(
-                  id: 0,
+                final produtoMontado = Produto(
+                  id: isEdicao ? produtoParaEditar.id : 0,
                   nome: _nomeController.text,
                   quantidadeEmEstoque: int.tryParse(_quantidadeController.text) ?? 0,
                   precoCusto: double.tryParse(_precoCustoController.text) ?? 0.0,
                   precoVenda: double.tryParse(_precoVendaController.text) ?? 0.0,
                   descricao: null,
                 );
-                _bloc.add(AdicionarProduto(novoProduto, widget.subCategoriaId));
-                _nomeController.clear();
-                _quantidadeController.clear();
-                _precoCustoController.clear();
-                _precoVendaController.clear();
+                if (isEdicao) {
+                  _bloc.add(AtualizarProduto(
+                      produtoMontado,
+                      widget.subCategoriaId,
+                  ));
+                } else {
+                  _bloc.add(AdicionarProduto(
+                    produtoMontado,
+                    widget.subCategoriaId,
+                  ));
+                }
                 Navigator.pop(context);
               },
-              child: const Text('Salvar', style: TextStyle(color: Colors.white)),
+              child: Text(isEdicao ? 'Atualizar' : 'Salvar', style: const TextStyle(color: Colors.white)),
             ),
           ],
         );
@@ -127,7 +112,7 @@ class _ProdutoPageState extends State<ProdutoPage> {
         titleTextStyle: const TextStyle(color: Colors.white, fontSize: 20),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _mostrarModalAdicionar,
+        onPressed:()=> { _mostrarModal()},
         backgroundColor: Colors.blueAccent,
         child: const Icon(Icons.add_circle, color: Colors.white),
       ),
@@ -178,10 +163,12 @@ class _ProdutoPageState extends State<ProdutoPage> {
       itemCount: lista.length,
       itemBuilder: (context, index) {
         final prod = lista[index];
+
         return Card(
           color: Colors.grey.shade900,
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: ListTile(
+            leading: const Icon(Icons.build_circle_outlined, color: Colors.orangeAccent),
             title: Text(
               prod.nome,
               style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -190,12 +177,58 @@ class _ProdutoPageState extends State<ProdutoPage> {
               'Estoque: ${prod.quantidadeEmEstoque} | Preço: R\$ ${prod.precoVenda.toStringAsFixed(2)}',
               style: TextStyle(color: Colors.grey.shade400),
             ),
-            leading: const Icon(Icons.build_circle_outlined, color: Colors.orangeAccent),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
-            onTap: () {
-              // Navegar para detalhes do produto
-            },
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.blueAccent),
+                  tooltip: 'Editar',
+                  onPressed: () {
+                    _mostrarModal(produtoParaEditar: prod);
+                  },
+                ),
+
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                  tooltip: 'Excluir',
+                  onPressed: () {
+                    _confirmarExclusao(prod.id, prod.nome);
+                  },
+                ),
+              ],
+            ),
           ),
+        );
+      },
+    );
+  }
+
+  void _confirmarExclusao(int produtoId, String nomeProduto) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.grey.shade900,
+          title: const Text('Excluir Produto', style: TextStyle(color: Colors.white)),
+          content: Text('Tem certeza que deseja excluir "$nomeProduto"?',
+              style: const TextStyle(color: Colors.grey)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+              onPressed: () {
+                _bloc.add(DeletarProduto(
+                    produtoId,
+                    widget.subCategoriaId,
+                ));
+                Navigator.pop(context);
+              },
+              child: const Text('Excluir', style: TextStyle(color: Colors.white)),
+            ),
+          ],
         );
       },
     );

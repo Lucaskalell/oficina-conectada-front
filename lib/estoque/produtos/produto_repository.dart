@@ -25,18 +25,41 @@ class ProdutoRepository {
   }
 
   Future<void> criarProduto(Produto produto, int subCategoriaId) async {
-    final String apiUrl = '/estoque/subCategorias/$subCategoriaId/produtos';
+    final String apiUrl = '/estoque/subcategorias/$subCategoriaId/produtos';
     try {
-      final response = await _apiClient.post(
-        apiUrl,
-        body: produto.toJson(),
-      );
+      final response = await _apiClient.post(apiUrl, body: produto.toJson());
       if (response.statusCode != 201 && response.statusCode != 200) {
         throw Exception('Falha ao criar produto: ${response.statusCode} - ${response.body}');
       }
     } catch (e, stackTrace) {
       debugPrint('Erro no POST: $e');
       debugPrint('Stack Trace: $stackTrace');
+      rethrow;
+    }
+  }
+
+  Future<void> atualizarProduto(Produto produto, int subCategoriaId) async {
+    final String apiUrl = '/estoque/produtos/${produto.id}';
+    try {
+      final response = await _apiClient.put(apiUrl, body: produto.toJson());
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception('Falha ao atualizar produto: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('deu erro : $e');
+      rethrow;
+    }
+  }
+
+  Future<void> deletarProduto(int produtoId, int subCategoriaId) async {
+    final String apiUrl = '/estoque/produtos/$produtoId';
+    try {
+      final response = await _apiClient.delete(apiUrl);
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception('Falha ao deletar produto: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('deu erro: $e');
       rethrow;
     }
   }

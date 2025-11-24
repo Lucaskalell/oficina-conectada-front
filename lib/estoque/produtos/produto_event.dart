@@ -25,3 +25,20 @@ class AdicionarProduto extends ProdutoEvent{
   @override
   List<Object> get props => [produto, subCategoriaId];
 }
+
+class AtualizarProduto extends ProdutoEvent{
+  final Produto produto;
+  final int subCategoriaId;
+  const AtualizarProduto(this.produto, this.subCategoriaId);
+  @override
+  List<Object> get props => [produto, subCategoriaId];
+}
+
+class DeletarProduto extends ProdutoEvent{
+  final int produtoId;
+  final int subCategoriaId;
+  const DeletarProduto(this.produtoId,this.subCategoriaId);
+  @override
+  List<Object> get props => [produtoId];
+
+}

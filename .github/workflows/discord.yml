@@ -45,7 +45,9 @@ jobs:
 
       - name: Enviar notificação para o Discord
         uses: Ilshidur/action-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          filename: commits.txt
+          args: '{{-F file=@commits.txt}}'
+
 

@@ -7,9 +7,8 @@ on:
 jobs:
   notify:
     runs-on: ubuntu-latest
-    
-    steps:
 
+    steps:
       - name: Checkout do Repositório
         uses: actions/checkout@v3
         with:
@@ -17,18 +16,20 @@ jobs:
 
       - name: Criar mensagem para o Discord
         run: |
+          printf '%s' "${{ toJson(github.event.commits) }}" > commits.json
+
           echo "**📢 Novo push detectado!**" > commits.txt
           echo "👤 Autor: ${{ github.actor }}" >> commits.txt
           echo "🕒 Data/Hora: $(date '+%d/%m/%Y %H:%M:%S')" >> commits.txt
           echo "" >> commits.txt
           echo "📝 Commits enviados:" >> commits.txt
 
-          count=$(jq 'length' <<< "${{ toJson(github.event.commits) }}")
+          count=$(jq 'length' commits.json)
 
-          jq -c '.[]' <<< "${{ toJson(github.event.commits) }}" | while read -r commit; do
+          jq -c '.[]' commits.json | while read -r commit; do
             sha=$(jq -r '.id' <<< "$commit")
             msg=$(jq -r '.message' <<< "$commit")
-            short=$(echo $sha | cut -c1-7)
+            short=$(echo "$sha" | cut -c1-7)
             echo "➡️ \`$short\` — $msg" >> commits.txt
           done
 
@@ -38,14 +39,14 @@ jobs:
           echo "" >> commits.txt
 
           if [ "$count" -eq 1 ]; then
-            echo "🎉 [Commit único, suave demais!](https://media.giphy.com/media/26AHONQ79FdWZhAI0/giphy.gif)" >> commits.txt
+            echo "🎉 Commit único!" >> commits.txt
           elif [ "$count" -eq 2 ]; then
-            echo "🤓 [Dois commits, mandou bem!](https://media.giphy.com/media/3o7TKtnuHOHHUjR38Y/giphy.gif)" >> commits.txt
+            echo "🤓 Dois commits!" >> commits.txt
           else
-            echo "😱 [Muitos commits de uma vez, socorro!](https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif)" >> commits.txt
+            echo "😱 Muitos commits!" >> commits.txt
           fi
 
-      - name: Send to Discord
+      - name: Enviar para Discord
         uses: Ilshidur/action-discord@master
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}

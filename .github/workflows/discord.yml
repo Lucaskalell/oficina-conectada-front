@@ -1,5 +1,4 @@
-name: Notify Discord on Commit
-
+name: Notificação de Push no Discord
 on:
   push:
     branches:
@@ -8,26 +7,34 @@ on:
 jobs:
   notify:
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Format commit list with GIFs
+
+      - name: Checkout do Repositório
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Criar mensagem para o Discord
         run: |
-          count=$(jq '.commits | length' <<< '${{ toJson(github.event.commits) }}')
           echo "**📢 Novo push detectado!**" > commits.txt
           echo "👤 Autor: ${{ github.actor }}" >> commits.txt
           echo "🕒 Data/Hora: $(date '+%d/%m/%Y %H:%M:%S')" >> commits.txt
           echo "" >> commits.txt
           echo "📝 Commits enviados:" >> commits.txt
-          for commit in $(jq -r '.commits[].id' <<< '${{ toJson(github.event.commits) }}'); do
-            msg=$(jq -r ".commits[] | select(.id==\"$commit\") | .message" <<< '${{ toJson(github.event.commits) }}')
-            short=$(echo $commit | cut -c1-7)
+
+          count=$(jq 'length' <<< '${{ toJson(github.event.commits) }}')
+          jq -c '.[]' <<< '${{ toJson(github.event.commits) }}' | while read -r commit; do
+            sha=$(jq -r '.id' <<< "$commit")
+            msg=$(jq -r '.message' <<< "$commit")
+            short=$(echo $sha | cut -c1-7)
             echo "➡️ \`$short\` — $msg" >> commits.txt
           done
+
           echo "" >> commits.txt
           echo "🚀 Branch: **${{ github.ref_name }}**" >> commits.txt
           echo "🔗 Repositório: ${{ github.repository }}" >> commits.txt
           echo "" >> commits.txt
 
-          # Escolhe GIF conforme número de commits
           if [ "$count" -eq 1 ]; then
             echo "🎉 [Commit único, suave demais!](https://media.giphy.com/media/26AHONQ79FdWZhAI0/giphy.gif)" >> commits.txt
           elif [ "$count" -eq 2 ]; then
@@ -36,8 +43,9 @@ jobs:
             echo "😱 [Muitos commits de uma vez, socorro!](https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif)" >> commits.txt
           fi
 
-      - name: Send to Discord
+      - name: Enviar notificação para o Discord
         uses: Ilshidur/action-discord@master
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
           filename: commits.txt
+

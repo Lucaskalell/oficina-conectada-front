@@ -14,6 +14,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
       - name: Criar mensagem para o Discord
         run: |
           echo "**📢 Novo push detectado!**" > commits.txt
@@ -22,8 +23,9 @@ jobs:
           echo "" >> commits.txt
           echo "📝 Commits enviados:" >> commits.txt
 
-          count=$(jq 'length' <<< '${{ toJson(github.event.commits) }}')
-          jq -c '.[]' <<< '${{ toJson(github.event.commits) }}' | while read -r commit; do
+          count=$(jq 'length' <<< "${{ toJson(github.event.commits) }}")
+
+          jq -c '.[]' <<< "${{ toJson(github.event.commits) }}" | while read -r commit; do
             sha=$(jq -r '.id' <<< "$commit")
             msg=$(jq -r '.message' <<< "$commit")
             short=$(echo $sha | cut -c1-7)
@@ -43,11 +45,8 @@ jobs:
             echo "😱 [Muitos commits de uma vez, socorro!](https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif)" >> commits.txt
           fi
 
-      - name: Enviar notificação para o Discord
+      - name: Send to Discord
         uses: Ilshidur/action-discord@master
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
-          args: '{{-F file=@commits.txt}}'
-
-
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          filename: commits.txt

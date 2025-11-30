@@ -1,26 +1,2 @@
-name: Avisar Discord
-on:
-  push:
-
-jobs:
-  notify:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Criar mensagem simples
-        run: |
-          echo "📢 **Novo push detectado!**" > message.txt
-          echo "" >> message.txt
-          echo "👤 **Autor:** ${{ github.actor }}" >> message.txt
-          echo "🕒 **Data/Hora:** $(date '+%d/%m/%Y %H:%M:%S')" >> message.txt
-          echo "🌿 **Branch:** \`${{ github.ref_name }}\`" >> message.txt
-          echo "📦 **Repositório:** ${{ github.repository }}" >> message.txt
-          echo "" >> message.txt
-          echo "📝 **Último commit:**" >> message.txt
-          echo "💬 ${{ github.event.head_commit.message }}" >> message.txt
-
-      - name: Enviar para Discord
-        uses: Ilshidur/action-discord@master
-        with:
-          url: ${{ secrets.DISCORD_WEBHOOK }}
-          bodyFile: message.txt
+#jobs:
+ # on:

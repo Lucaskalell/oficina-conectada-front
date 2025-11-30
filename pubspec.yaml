@@ -19,6 +19,7 @@ dependencies:
   
   flutter_bloc: ^8.1.6
   equatable: ^2.0.5
+  syncfusion_flutter_charts: ^26.0.0
 
 
 dev_dependencies:

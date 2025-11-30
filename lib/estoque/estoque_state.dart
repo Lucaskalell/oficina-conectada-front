@@ -31,3 +31,22 @@ class EstoqueErro extends EstoqueState{
   @override
   List<Object> get props => [mensagem];
 }
+
+//////todo resumos
+class ResumoLoading extends EstoqueState {}
+
+class ResumoSucesso extends EstoqueState{
+  final EstoqueResumo resumo;
+  const ResumoSucesso(this.resumo);
+
+  @override
+  List<Object> get props => [resumo];
+}
+
+class ResumoErro extends EstoqueState {
+  final String mensagem;
+  const ResumoErro(this.mensagem);
+  @override
+  List<Object> get props => [mensagem];
+}
+

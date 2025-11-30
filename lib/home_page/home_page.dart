@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../dash_board/dash_board_page.dart';
 import '../estoque/estoque_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -11,37 +12,33 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
-  String _currentTitle = 'DashBoard';
+  int _selectedIndex = -1;
+  String _currentTitle = 'Oficina do Tomioka';
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final List<Widget> _screens = [
-    // 0: Dashboard
-    const Center(
-      child: Text('Página: Dashboard (Kanban)', style: TextStyle(fontSize: 24, color: Colors.grey)),
-    ),
-    // 1: Clientes
-    const Center(
-      child: Text('Página: Clientes', style: TextStyle(fontSize: 24, color: Colors.grey)),
-    ),
-
+    const DashBoardPage(),
+    const Center(child: Text('Página: Clientes', style: TextStyle(fontSize: 24, color: Colors.grey))), // 1
     const EstoquePage(),
-
-    // 3: Chat
-    const Center(
-      child: Text('Página: Chat', style: TextStyle(fontSize: 24, color: Colors.grey)),
-    ),
-    // 4: Configuração
-    const Center(
-      child: Text('Página: Configuração', style: TextStyle(fontSize: 24, color: Colors.grey)),
-    ),
+    const Center(child: Text('Página: Chat', style: TextStyle(fontSize: 24, color: Colors.grey))),     // 3
+    const Center(child: Text('Página: Configuração', style: TextStyle(fontSize: 24, color: Colors.grey))), // 4
   ];
 
   void _onScreenSelected(int index, String titulo) {
     setState(() {
       _selectedIndex = index;
       _currentTitle = titulo;
+    });
+    if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  void _resetToHome() {
+    setState(() {
+      _selectedIndex = -1;
+      _currentTitle = 'Oficina do Tomioka';
     });
     if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
       Navigator.of(context).pop();
@@ -56,25 +53,15 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
   Widget _buildProfileAvatar() {
     return PopupMenuButton<String>(
       onSelected: (value) {
-        if (value == 'perfil') {
-          print('Abrir tela de Perfil');
-        }
-        if (value == 'sair') {
-          _handleLogout();
-        }
+        if (value == 'sair') _handleLogout();
       },
-      tooltip: "Opções de Conta",
+      tooltip: 'Opções',
       child: CircleAvatar(
         radius: 18,
-        backgroundImage: AssetImage('assets/images/tomioka.png'),
+        backgroundImage: const AssetImage('assets/images/tomioka.png'),
         backgroundColor: Colors.grey.shade700,
       ),
       itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -96,11 +83,8 @@ class _HomePageState extends State<HomePage> {
         IconButton(
           icon: const Icon(Icons.notifications_none_outlined),
           tooltip: 'Notificações',
-          onPressed: () {
-            /* TODO: Abrir painel de notificações */
-          },
+          onPressed: () {},
         ),
-
         ElevatedButton.icon(
           icon: const Icon(Icons.add, size: 18),
           label: const Text('Nova Ordem de Serviço'),
@@ -109,11 +93,8 @@ class _HomePageState extends State<HomePage> {
             foregroundColor: Colors.black,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
-          onPressed: () {
-            /* TODO: Abrir modal de "Nova OS" */
-          },
+          onPressed: () {},
         ),
-
         const SizedBox(width: 16),
         _buildProfileAvatar(),
         const SizedBox(width: 16),
@@ -127,68 +108,52 @@ class _HomePageState extends State<HomePage> {
       color: const Color(0xff252526),
       child: Column(
         children: [
+          InkWell(
+            onTap: _resetToHome,
+            child: UserAccountsDrawerHeader(
+              accountName: const Text(
+                'Oficina do Tomioka',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              accountEmail: const Text('lucas@email.com'),
+              currentAccountPicture: CircleAvatar(
+                backgroundImage: const AssetImage('assets/images/tomioka.png'),
+                backgroundColor: Colors.grey.shade300,
+              ),
+              decoration: BoxDecoration(color: Colors.grey.shade800),
+            ),
+          ),
+          const SizedBox(height: 10),
+
           Expanded(
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
-                UserAccountsDrawerHeader(
-                  accountName: const Text(
-                    'Oficina do Tomioka',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                  ),
-                  accountEmail: const Text('lucas@email.com'), // TODO: Puxar o obejeto usuario
-                  currentAccountPicture: CircleAvatar(
-                    backgroundImage: AssetImage('assets/images/tomioka.png'),
-                    backgroundColor: Colors.grey.shade300,
-                  ),
-                  decoration: BoxDecoration(color: Colors.grey.shade800),
-                ),
-
-                const SizedBox(height: 10),
-
-                // --- Itens do Menu ---
+                // Dashboard
                 ListTile(
-                  leading: Icon(
-                    Icons.dashboard_outlined,
-                    color: _selectedIndex == 0 ? Colors.white : Colors.grey.shade400,
-                  ),
-                  title: Text(
-                    'Dashboard',
-                    style: TextStyle(color: _selectedIndex == 0 ? Colors.white : Colors.grey.shade300),
-                  ),
+                  leading: Icon(Icons.dashboard_outlined, color: _selectedIndex == 0 ? Colors.white : Colors.grey.shade400),
+                  title: Text('Dashboard', style: TextStyle(color: _selectedIndex == 0 ? Colors.white : Colors.grey.shade300)),
                   tileColor: _selectedIndex == 0 ? Colors.blueAccent.withOpacity(0.2) : null,
                   onTap: () => _onScreenSelected(0, 'Dashboard'),
                 ),
+                // Clientes
                 ListTile(
                   leading: Icon(Icons.people_outline, color: _selectedIndex == 1 ? Colors.white : Colors.grey.shade400),
-                  title: Text(
-                    'Clientes',
-                    style: TextStyle(color: _selectedIndex == 1 ? Colors.white : Colors.grey.shade300),
-                  ),
+                  title: Text('Clientes', style: TextStyle(color: _selectedIndex == 1 ? Colors.white : Colors.grey.shade300)),
                   tileColor: _selectedIndex == 1 ? Colors.blueAccent.withOpacity(0.2) : null,
                   onTap: () => _onScreenSelected(1, 'Clientes'),
                 ),
+                // Estoque
                 ListTile(
-                  leading: Icon(
-                    Icons.inventory_2_outlined,
-                    color: _selectedIndex == 2 ? Colors.white : Colors.grey.shade400,
-                  ),
-                  title: Text(
-                    'Estoque',
-                    style: TextStyle(color: _selectedIndex == 2 ? Colors.white : Colors.grey.shade300),
-                  ),
+                  leading: Icon(Icons.inventory_2_outlined, color: _selectedIndex == 2 ? Colors.white : Colors.grey.shade400),
+                  title: Text('Estoque', style: TextStyle(color: _selectedIndex == 2 ? Colors.white : Colors.grey.shade300)),
                   tileColor: _selectedIndex == 2 ? Colors.blueAccent.withOpacity(0.2) : null,
                   onTap: () => _onScreenSelected(2, 'Estoque'),
                 ),
+                // Chat
                 ListTile(
-                  leading: Icon(
-                    Icons.chat_bubble_outline,
-                    color: _selectedIndex == 3 ? Colors.white : Colors.grey.shade400,
-                  ),
-                  title: Text(
-                    'Chat',
-                    style: TextStyle(color: _selectedIndex == 3 ? Colors.white : Colors.grey.shade300),
-                  ),
+                  leading: Icon(Icons.chat_bubble_outline, color: _selectedIndex == 3 ? Colors.white : Colors.grey.shade400),
+                  title: Text('Chat', style: TextStyle(color: _selectedIndex == 3 ? Colors.white : Colors.grey.shade300)),
                   tileColor: _selectedIndex == 3 ? Colors.blueAccent.withOpacity(0.2) : null,
                   onTap: () => _onScreenSelected(3, 'Chat'),
                 ),
@@ -198,22 +163,16 @@ class _HomePageState extends State<HomePage> {
                   child: Divider(thickness: 0.5, color: Colors.grey),
                 ),
 
+                // Configuração
                 ListTile(
-                  leading: Icon(
-                    Icons.settings_outlined,
-                    color: _selectedIndex == 4 ? Colors.white : Colors.grey.shade400,
-                  ),
-                  title: Text(
-                    'Configuração',
-                    style: TextStyle(color: _selectedIndex == 4 ? Colors.white : Colors.grey.shade300),
-                  ),
+                  leading: Icon(Icons.settings_outlined, color: _selectedIndex == 4 ? Colors.white : Colors.grey.shade400),
+                  title: Text('Configuração', style: TextStyle(color: _selectedIndex == 4 ? Colors.white : Colors.grey.shade300)),
                   tileColor: _selectedIndex == 4 ? Colors.blueAccent.withOpacity(0.2) : null,
                   onTap: () => _onScreenSelected(4, 'Configuração'),
                 ),
               ],
             ),
           ),
-
           SafeArea(
             child: ListTile(
               leading: const Icon(Icons.logout, color: Colors.redAccent),
@@ -227,11 +186,38 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildBody() {
-    return Container(
-      decoration: const BoxDecoration(
-        image: DecorationImage(image: AssetImage('assets/images/testehome.png'), fit: BoxFit.cover),
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 500),
+      child: _selectedIndex == -1
+          ? Container(
+        key: const ValueKey('HomeImage'),
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/testehome.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+              colors: [Colors.black.withOpacity(0.8), Colors.transparent],
+            ),
+          ),
+          alignment: Alignment.bottomLeft,
+          padding: const EdgeInsets.all(32),
+          child: const Text(
+            'Bem-vindo, Kalell',
+            style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+          ),
+        ),
+      )
+          : Container(
+        key: ValueKey('Content_$_selectedIndex'),
+        color: const Color(0xFF121212),
+        child: _screens[_selectedIndex],
       ),
-      child: _screens[_selectedIndex],
     );
   }
 
@@ -246,12 +232,12 @@ class _HomePageState extends State<HomePage> {
       body: isMobile
           ? _buildBody()
           : Row(
-              children: [
-                _buildDrawer(),
-                const VerticalDivider(thickness: 1, width: 1, color: Colors.black),
-                Expanded(child: _buildBody()),
-              ],
-            ),
+        children: [
+          _buildDrawer(),
+          const VerticalDivider(thickness: 1, width: 1, color: Colors.black),
+          Expanded(child: _buildBody()),
+        ],
+      ),
     );
   }
 }

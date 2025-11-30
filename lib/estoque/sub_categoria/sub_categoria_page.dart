@@ -27,7 +27,7 @@ class _SubCategoriaPageState extends State<SubCategoriaPage> {
   Widget _buildBody(List<SubCategoria> subCategorias) {
     if (subCategorias.isEmpty) {
       return Center(
-        child: Text("Nenhuma subcategoria encontrada", style: TextStyle(color: Colors.black45, fontSize: 18)),
+        child: Text('Nenhuma subcategoria encontrada', style: TextStyle(color: Colors.black45, fontSize: 18)),
       );
     }
     return ListView.builder(

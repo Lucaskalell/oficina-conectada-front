@@ -22,3 +22,11 @@ class BuscarProdutosIniciado extends EstoqueEvent{}
 class BuscarProdutosSucesso extends EstoqueEvent{}
 
 class BuscarProdutosFalhou extends EstoqueEvent{}
+
+
+class BuscarResumoIniciado extends EstoqueEvent{}
+
+class BuscarResumoSucesso extends EstoqueEvent{}
+
+class BuscarResumoFalhou extends EstoqueEvent{}
+

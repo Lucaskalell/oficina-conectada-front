@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:oficina_conectada_front/estoque/estoque_repository.dart';
 
 import 'model/categoria.dart';
+import 'model/estoque_resumo.dart';
 
 part 'estoque_event.dart';
 part 'estoque_state.dart';
@@ -22,6 +23,17 @@ class EstoqueBloc extends Bloc<EstoqueEvent, EstoqueState> {
         emit(EstoqueSucesso(categorias));
       } catch (e) {
         emit(EstoqueErro(e.toString()));
+      }
+    });
+    
+    on<BuscarResumoIniciado>((event, emit)async{
+      emit(ResumoLoading());
+      try{
+        final resumo = await estoqueRepository.getResumoEstoque();
+        emit(ResumoSucesso(resumo));
+      }catch (e,s){
+        debugPrint('segue erro e o caminho do erro: $e\n$s');
+        emit(ResumoErro(e.toString()));
       }
     });
   }

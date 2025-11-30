@@ -1,29 +1,43 @@
-
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:oficina_conectada_front/core/api/ApiClient.dart';
 
+import 'model/estoque_resumo.dart';
 import 'model/categoria.dart';
 
-class EstoqueRepository{
+class EstoqueRepository {
   final ApiClient _apiClient = ApiClient();
 
-
-  Future<List<Categoria>> buscarCategorias()async{
-    try{
+  Future<List<Categoria>> buscarCategorias() async {
+    try {
       final response = await _apiClient.get('/estoque/categorias');
-      if(response.statusCode == 200){
-        final List<dynamic>jsonList = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonList = jsonDecode(response.body);
         return jsonList.map((json) => Categoria.fromJson(json)).toList();
-      }else{
+      } else {
         debugPrint('Erro ao buscar categorias: ${response.statusCode}');
         throw Exception('Falha ao carregar categorias do servidor');
       }
-    }catch(e,stackTrace){
+    } catch (e, stackTrace) {
       debugPrint('Erro de busca no EstoqueRepostiory: $e\n$stackTrace');
       rethrow;
     }
   }
 
+  Future<EstoqueResumo> getResumoEstoque() async {
+    try {
+      final response = await _apiClient.get('/estoque/resumo');
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        return EstoqueResumo.fromJson(data);
+      } else {
+        debugPrint('Erro ao buscar resumo do estoque:${response.statusCode}:${response.body}');
+        throw Exception('Falha ao carregar resumo do estoque do servidor');
+      }
+    } catch (e, s) {
+      debugPrint('Erro de busca no EstoqueRepostiory: $e\n$s');
+      rethrow;
+    }
+  }
 }

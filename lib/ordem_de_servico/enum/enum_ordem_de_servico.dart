@@ -1,0 +1,7 @@
+enum StatusOrdemDeServico {
+  NAO_INICIADO,
+  EM_ANDAMENTO,
+  AGUARDANDO_PECA,
+  FINALIZADO,
+  CANCELADO,
+}

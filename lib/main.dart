@@ -4,6 +4,7 @@ import 'package:oficina_conectada_front/home_page/home_page.dart';
 import 'package:oficina_conectada_front/login/login_page.dart';
 import 'dash_board/dash_board_page.dart';
 import 'estoque/estoque_page.dart';
+import 'ordem_de_servico/ordem_de_servico_page.dart';
 
 void main() {
   SyncfusionLicense.registerLicense('Ngo9BigBOggjHTQxAR8/V1JFaF1cXGFCf1JpRmNGfV5ycUVBalhYTnZWUj0eQnxTdEBiWH1dcX1RT2BVUkx2X0leYg==');
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomePage(),
         '/estoque': (context) => const EstoquePage(),
          '/dashboard': (context) => const DashBoardPage(),
+        '/ordemDeServico': (context) => const OrdemServicoPage(),
       },
     );
   }

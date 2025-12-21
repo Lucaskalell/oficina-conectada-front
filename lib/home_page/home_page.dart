@@ -93,7 +93,9 @@ class _HomePageState extends State<HomePage> {
             foregroundColor: Colors.black,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).pushNamed('/ordemDeServico');
+          },
         ),
         const SizedBox(width: 16),
         _buildProfileAvatar(),

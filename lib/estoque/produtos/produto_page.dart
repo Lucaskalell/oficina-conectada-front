@@ -3,8 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:oficina_conectada_front/estoque/produtos/produto_bloc.dart';
 import 'package:oficina_conectada_front/estoque/produtos/produto_repository.dart';
 
-import 'package:oficina_conectada_front/common/widget/toast/custom_toast.dart';
 import 'package:oficina_conectada_front/estoque/model/produto.dart';
+
+import '../../components/toast/custom_toast.dart';
 
 class ProdutoPage extends StatefulWidget {
   final int subCategoriaId;
@@ -31,7 +32,7 @@ class _ProdutoPageState extends State<ProdutoPage> {
     _bloc.add(BuscarProdutos(widget.subCategoriaId));
   }
 
-    _mostrarModal({Produto? produtoParaEditar}) {
+  _mostrarModal({Produto? produtoParaEditar}) {
     final isEdicao = produtoParaEditar != null;
     if (isEdicao) {
       _nomeController.text = produtoParaEditar.nome;
@@ -50,17 +51,50 @@ class _ProdutoPageState extends State<ProdutoPage> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: Colors.grey.shade900,
-          title: Text(isEdicao ? 'Editar Produto' : 'Adicionar Novo Produto',
-              style: const TextStyle(color: Colors.white)),
+          title: Text(
+            isEdicao ? 'Editar Produto' : 'Adicionar Novo Produto',
+            style: const TextStyle(color: Colors.white),
+          ),
 
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(controller: _nomeController, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Nome', labelStyle: TextStyle(color: Colors.grey))),
-                TextField(controller: _quantidadeController, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Qtd', labelStyle: TextStyle(color: Colors.grey))),
-                TextField(controller: _precoCustoController, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Custo', labelStyle: TextStyle(color: Colors.grey))),
-                TextField(controller: _precoVendaController, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white), decoration: const InputDecoration(labelText: 'Venda', labelStyle: TextStyle(color: Colors.grey))),
+                TextField(
+                  controller: _nomeController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    labelText: 'Nome',
+                    labelStyle: TextStyle(color: Colors.grey),
+                  ),
+                ),
+                TextField(
+                  controller: _quantidadeController,
+                  keyboardType: TextInputType.number,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    labelText: 'Qtd',
+                    labelStyle: TextStyle(color: Colors.grey),
+                  ),
+                ),
+                TextField(
+                  controller: _precoCustoController,
+                  keyboardType: TextInputType.number,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    labelText: 'Custo',
+                    labelStyle: TextStyle(color: Colors.grey),
+                  ),
+                ),
+                TextField(
+                  controller: _precoVendaController,
+                  keyboardType: TextInputType.number,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    labelText: 'Venda',
+                    labelStyle: TextStyle(color: Colors.grey),
+                  ),
+                ),
               ],
             ),
           ),
@@ -81,19 +115,16 @@ class _ProdutoPageState extends State<ProdutoPage> {
                   descricao: null,
                 );
                 if (isEdicao) {
-                  _bloc.add(AtualizarProduto(
-                      produtoMontado,
-                      widget.subCategoriaId,
-                  ));
+                  _bloc.add(AtualizarProduto(produtoMontado, widget.subCategoriaId));
                 } else {
-                  _bloc.add(AdicionarProduto(
-                    produtoMontado,
-                    widget.subCategoriaId,
-                  ));
+                  _bloc.add(AdicionarProduto(produtoMontado, widget.subCategoriaId));
                 }
                 Navigator.pop(context);
               },
-              child: Text(isEdicao ? 'Atualizar' : 'Salvar', style: const TextStyle(color: Colors.white)),
+              child: Text(
+                isEdicao ? 'Atualizar' : 'Salvar',
+                style: const TextStyle(color: Colors.white),
+              ),
             ),
           ],
         );
@@ -112,7 +143,7 @@ class _ProdutoPageState extends State<ProdutoPage> {
         titleTextStyle: const TextStyle(color: Colors.white, fontSize: 20),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed:()=> { _mostrarModal()},
+        onPressed: () => {_mostrarModal()},
         backgroundColor: Colors.blueAccent,
         child: const Icon(Icons.add_circle, color: Colors.white),
       ),
@@ -120,11 +151,7 @@ class _ProdutoPageState extends State<ProdutoPage> {
         bloc: _bloc,
         listener: (context, state) {
           if (state is ProdutoError) {
-            CustomToast.show(
-              context,
-              message: state.message,
-              type :ToastType.error,
-            );
+            CustomToast.show(context, message: state.message, type: ToastType.error);
           }
         },
         builder: (context, state) {
@@ -210,8 +237,10 @@ class _ProdutoPageState extends State<ProdutoPage> {
         return AlertDialog(
           backgroundColor: Colors.grey.shade900,
           title: const Text('Excluir Produto', style: TextStyle(color: Colors.white)),
-          content: Text('Tem certeza que deseja excluir "$nomeProduto"?',
-              style: const TextStyle(color: Colors.grey)),
+          content: Text(
+            'Tem certeza que deseja excluir "$nomeProduto"?',
+            style: const TextStyle(color: Colors.grey),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -220,10 +249,7 @@ class _ProdutoPageState extends State<ProdutoPage> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
               onPressed: () {
-                _bloc.add(DeletarProduto(
-                    produtoId,
-                    widget.subCategoriaId,
-                ));
+                _bloc.add(DeletarProduto(produtoId, widget.subCategoriaId));
                 Navigator.pop(context);
               },
               child: const Text('Excluir', style: TextStyle(color: Colors.white)),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:oficina_conectada_front/login/login_bloc.dart';
 import 'package:oficina_conectada_front/login/login_repository.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -16,13 +17,47 @@ class _LoginPageState extends State<LoginPage> {
   late LoginBloc _loginBloc;
   late TextEditingController _emailController;
   late TextEditingController _senhaController;
+  bool _lembrarMe = false;
 
   final FocusNode _emailFocus = FocusNode();
   final FocusNode _senhaFocus = FocusNode();
 
+  @override
+  void initState() {
+    super.initState();
+    _loginBloc = LoginBloc(LoginRepository());
+    _emailController = TextEditingController();
+    _senhaController = TextEditingController();
+    _carregarCredenciais();
+  }
+
+  Future<void> _carregarCredenciais() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _emailController.text = prefs.getString('remember_email') ?? '';
+      _senhaController.text = prefs.getString('remember_password') ?? '';
+      _lembrarMe = prefs.getBool('remember_me') ?? false;
+    });
+  }
+
+  Future<void> _salvarCredenciais() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (_lembrarMe) {
+      await prefs.setString('remember_email', _emailController.text);
+      await prefs.setString('remember_password', _senhaController.text);
+      await prefs.setBool('remember_me', true);
+    } else {
+      await prefs.remove('remember_email');
+      await prefs.remove('remember_password');
+      await prefs.setBool('remember_me', false);
+    }
+  }
+
   void _handleLoginClick() {
     _emailFocus.unfocus();
     _senhaFocus.unfocus();
+
+    _salvarCredenciais();
 
     _loginBloc.add(
       LoginBotaoPressionado(
@@ -36,14 +71,6 @@ class _LoginPageState extends State<LoginPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _loginBloc = LoginBloc(LoginRepository());
-    _emailController = TextEditingController();
-    _senhaController = TextEditingController();
   }
 
   Widget _buildTitle() {
@@ -98,6 +125,28 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  Widget _buildRememberMe() {
+    return Theme(
+      data: ThemeData(unselectedWidgetColor: Colors.white70),
+      child: CheckboxListTile(
+        title: const Text(
+          'Lembrar de mim',
+          style: TextStyle(color: Colors.white70, fontSize: 14),
+        ),
+        value: _lembrarMe,
+        onChanged: (bool? value) {
+          setState(() {
+            _lembrarMe = value ?? false;
+          });
+        },
+        controlAffinity: ListTileControlAffinity.leading,
+        contentPadding: EdgeInsets.zero,
+        activeColor: Colors.white,
+        checkColor: Colors.black,
+      ),
+    );
+  }
+
   Widget _buildLoginButton() {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
@@ -118,7 +167,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildForgotPasswordButton() {
     return TextButton(
       onPressed: () {
-        // TODO: kalello não esuqecer logica aqui mermao "Esqueci a senha"
+        // TODO: kalell não esuqecer logica aqui mermao "Esqueci a senha"
       },
       child: const Text(
         'ESQUECEU SUA SENHA?',
@@ -148,7 +197,8 @@ class _LoginPageState extends State<LoginPage> {
               _buildEmailField(),
               const SizedBox(height: 16),
               _buildSenhaField(),
-              const SizedBox(height: 32),
+              _buildRememberMe(),
+              const SizedBox(height: 16),
               _buildLoginButton(),
               const SizedBox(height: 16),
               _buildForgotPasswordButton(),
@@ -171,18 +221,12 @@ class _LoginPageState extends State<LoginPage> {
         }
       },
       builder: (context, state) {
-        switch (state.runtimeType) {
-          case LoginLoading:
-            return const Center(
-              child: CircularProgressIndicator(color: Colors.white),
-            );
-
-          case LoginInitial:
-          case LoginError:
-          case LoginSuccess:
-          default:
-            return _buildBody();
+        if (state is LoginLoading) {
+          return const Center(
+            child: CircularProgressIndicator(color: Colors.white),
+          );
         }
+        return _buildBody();
       },
     );
   }

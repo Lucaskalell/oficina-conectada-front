@@ -44,7 +44,12 @@ class _OrdemServicoPageState extends State<OrdemServicoPage> {
   _adicionarOrdemServico() {
     return FloatingActionButton(
       onPressed: () => {
-        CriarOrdemDeServicoPage()
+        Navigator.push(
+          context,
+        MaterialPageRoute(
+        builder:(_)=> const  CriarOrdemDeServicoPage()
+        ),
+        )
       },
       backgroundColor: ColorsApp.azul,
       tooltip: 'Adicionar Ordem de Serviço',

@@ -7,7 +7,9 @@ import 'estoque/estoque_page.dart';
 import 'ordem_de_servico/ordem_de_servico_page.dart';
 
 void main() {
-  SyncfusionLicense.registerLicense('Ngo9BigBOggjHTQxAR8/V1JFaF1cXGFCf1JpRmNGfV5ycUVBalhYTnZWUj0eQnxTdEBiWH1dcX1RT2BVUkx2X0leYg==');
+  SyncfusionLicense.registerLicense(
+    'Ngo9BigBOggjHTQxAR8/V1JFaF1cXGFCf1JpRmNGfV5ycUVBalhYTnZWUj0eQnxTdEBiWH1dcX1RT2BVUkx2X0leYg==',
+  );
 
   runApp(const MyApp());
 }
@@ -19,16 +21,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Oficina Conectada',
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color(0xFF121212),
-      ),
+      theme: ThemeData.dark().copyWith(scaffoldBackgroundColor: const Color(0xFF121212)),
       debugShowCheckedModeBanner: false,
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginPage(),
         '/home': (context) => const HomePage(),
         '/estoque': (context) => const EstoquePage(),
-         '/dashboard': (context) => const DashBoardPage(),
+        '/dashboard': (context) => const DashBoardPage(),
         '/ordemDeServico': (context) => const OrdemServicoPage(),
       },
     );

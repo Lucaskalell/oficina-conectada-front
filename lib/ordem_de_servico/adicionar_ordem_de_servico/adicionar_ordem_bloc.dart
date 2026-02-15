@@ -10,11 +10,12 @@ class AdicionarOrdemDeServicoBloc extends Bloc<AdicionarOrdemEvent, AdicionarOrd
 
   AdicionarOrdemDeServicoBloc(this.repository) : super(AdicionarOrdemInitialState()) {
     on<CriarOrdemDeServico>((event, emit) async {
+      emit(AdiconaroOrdemLoadingState());
       try{
-        final criarOrdemDeServico = await repository.putOrdenDeServico(event.criarOrdemDeServico);
+        final criarOrdemDeServico = await repository.postOrdenDeServico(event.criarOrdemDeServico);
         emit(AdicionarOrdemSuccessState(criarOrdemDeServico));
       }catch(e,s){
-        emit(AdicionarOrdemErrorState(toString()));
+        emit(AdicionarOrdemErrorState(e.toString()));
         debugPrintStack(stackTrace: s);
       }
     });

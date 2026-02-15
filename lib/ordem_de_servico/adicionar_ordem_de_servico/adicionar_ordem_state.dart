@@ -1,4 +1,4 @@
-import 'package:oficina_conectada_front/ordem_de_servico/model/ordem_de_servico_model.dart';
+import 'package:oficina_conectada_front/model/add_ordem_de_servico/ordem_de_servico_model.dart';
 
 abstract class AdicionarOrdemState {}
 

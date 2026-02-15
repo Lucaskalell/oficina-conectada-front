@@ -3,12 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:oficina_conectada_front/dash_board/dash_board_bloc.dart';
 import 'package:oficina_conectada_front/dash_board/dash_board_event.dart';
 import 'package:oficina_conectada_front/dash_board/dash_board_repository.dart';
-import 'package:oficina_conectada_front/dash_board/model/dash_board_model.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+import '../model/model_dash_board/OrdemServicoMock.dart';
+import '../model/model_dash_board/dash_board_model.dart';
+import '../model/model_dash_board/dash_board_semana.dart';
 import 'dash_board_state.dart';
-import 'model/OrdemServicoMock.dart';
-import 'model/dash_board_semana.dart';
 
 class DashBoardPage extends StatefulWidget {
   const DashBoardPage({super.key});
@@ -125,7 +125,10 @@ class _DashBoardPageState extends State<DashBoardPage> {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: const Color(0xFF1E1E1E), borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: SfCircularChart(
         title: ChartTitle(
           text: 'Status das O.S.',
@@ -244,15 +247,15 @@ class _DashBoardPageState extends State<DashBoardPage> {
         status: StatusOS.concluido,
       ),
       OrdemServicoMock(
-          id: 4,
-          cliente: 'Naruto Uzumaki',
-          carro: 'Toyota Corolla',
-          placa: 'ABC-1234',
-          servicos: 'Troca de óleo',
-          valorPecas: 200,
-          valorMaoDeObra: 50,
-          status: StatusOS.concluido,
-      )
+        id: 4,
+        cliente: 'Naruto Uzumaki',
+        carro: 'Toyota Corolla',
+        placa: 'ABC-1234',
+        servicos: 'Troca de óleo',
+        valorPecas: 200,
+        valorMaoDeObra: 50,
+        status: StatusOS.concluido,
+      ),
     ];
 
     showDialog(
@@ -363,7 +366,10 @@ class _DashBoardPageState extends State<DashBoardPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Deseja finalizar a O.S. e enviar esta mensagem?', style: TextStyle(color: Colors.grey)),
+              const Text(
+                'Deseja finalizar a O.S. e enviar esta mensagem?',
+                style: TextStyle(color: Colors.grey),
+              ),
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
@@ -374,7 +380,11 @@ class _DashBoardPageState extends State<DashBoardPage> {
                 ),
                 child: Text(
                   mensagem,
-                  style: const TextStyle(color: Colors.white70, fontFamily: 'monospace', fontSize: 12),
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontFamily: 'monospace',
+                    fontSize: 12,
+                  ),
                 ),
               ),
             ],
@@ -411,7 +421,13 @@ class _KpiCard extends StatelessWidget {
   final Color color;
   final VoidCallback? onTap;
 
-  const _KpiCard({required this.title, required this.value, required this.icon, required this.color, this.onTap});
+  const _KpiCard({
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.color,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -447,7 +463,11 @@ class _KpiCard extends StatelessWidget {
                 const SizedBox(height: 10),
                 Text(
                   value,
-                  style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),

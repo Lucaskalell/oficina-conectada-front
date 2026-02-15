@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:oficina_conectada_front/core/api/ApiClient.dart';
-import 'package:oficina_conectada_front/estoque/model/produto.dart';
+
+import '../../model/model_ordem_produto/produto.dart';
+
 
 class ProdutoRepository {
   final ApiClient _apiClient = ApiClient();

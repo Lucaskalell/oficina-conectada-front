@@ -3,8 +3,11 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:oficina_conectada_front/core/api/ApiClient.dart';
 
-import 'model/estoque_resumo.dart';
-import 'model/categoria.dart';
+
+import '../model/model_ordem_produto/categoria.dart';
+import '../model/model_ordem_produto/estoque_resumo.dart';
+
+
 
 class EstoqueRepository {
   final ApiClient _apiClient = ApiClient();

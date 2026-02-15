@@ -2,7 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:oficina_conectada_front/core/api/ApiClient.dart';
-import 'package:oficina_conectada_front/estoque/model/sub_categoria.dart';
+
+import '../../model/model_ordem_produto/sub_categoria.dart';
 
 class SubCategoriaRepository {
   final ApiClient _apiClient = ApiClient();

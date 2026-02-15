@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:oficina_conectada_front/colors/colors.dart';
-import 'package:oficina_conectada_front/ordem_de_servico/model/ordem_de_servico_model.dart';
+import 'package:oficina_conectada_front/model/add_ordem_de_servico/ordem_de_servico_model.dart';
 import 'package:oficina_conectada_front/ordem_de_servico/ordem_de_servico_event.dart';
 import 'package:oficina_conectada_front/ordem_de_servico/ordem_de_servico_state.dart';
 import '../components/headers_cell_text/hearders_cell_text.dart';
@@ -116,7 +116,15 @@ class _OrdemServicoPageState extends State<OrdemServicoPage> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.edit, color: ColorsApp.cianoEscuro, size: 20),
-                    onPressed: () {},
+                    onPressed: () {
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (context) => EditarOrdemDeServicoPage(ordem: ordem),
+                      //   ),
+                      // );
+                      _ordemDeServicoBloc.add(EditarOrdemById(ordem));
+                    },
                   ),
                   IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red, size: 20),

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:oficina_conectada_front/core/api/ApiClient.dart';
 
-import 'model/ordem_de_servico_model.dart';
+import 'package:oficina_conectada_front/model/add_ordem_de_servico/ordem_de_servico_model.dart';
 
 mixin class OrdemDeServicoRepository {
   final ApiClient _apiClient = ApiClient();

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:oficina_conectada_front/estoque/model/sub_categoria.dart';
 import 'package:oficina_conectada_front/estoque/produtos/produto_page.dart';
 import 'package:oficina_conectada_front/estoque/sub_categoria/sub_categoria_bloc.dart';
 import 'package:oficina_conectada_front/estoque/sub_categoria/sub_categoria_repository.dart';
+
+import '../../model/model_ordem_produto/sub_categoria.dart';
+
 
 class SubCategoriaPage extends StatefulWidget {
   final int categoriaId;

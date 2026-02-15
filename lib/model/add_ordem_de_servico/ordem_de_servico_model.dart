@@ -1,4 +1,5 @@
-import 'package:oficina_conectada_front/ordem_de_servico/enum/enum_ordem_de_servico.dart';
+
+import 'package:oficina_conectada_front/enum/enum_ordem_de_servico.dart';
 
 class OrdemDeServicoModel {
   final int? id;

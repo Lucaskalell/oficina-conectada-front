@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:oficina_conectada_front/estoque/produtos/produto_bloc.dart';
 import 'package:oficina_conectada_front/estoque/produtos/produto_repository.dart';
 
-import 'package:oficina_conectada_front/estoque/model/produto.dart';
 
 import '../../components/toast/custom_toast.dart';
+import '../../model/model_ordem_produto/produto.dart';
 
 class ProdutoPage extends StatefulWidget {
   final int subCategoriaId;

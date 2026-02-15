@@ -6,7 +6,10 @@ import 'package:oficina_conectada_front/estoque/estoque_bloc.dart';
 import 'package:oficina_conectada_front/estoque/estoque_repository.dart';
 import 'package:oficina_conectada_front/estoque/sub_categoria/sub_categoria_page.dart';
 
-import 'model/estoque_resumo.dart';
+import '../model/model_ordem_produto/estoque_resumo.dart';
+
+
+
 
 class EstoquePage extends StatefulWidget {
   const EstoquePage({super.key});

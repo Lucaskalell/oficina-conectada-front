@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:oficina_conectada_front/estoque/produtos/produto_repository.dart';
 
-import 'package:oficina_conectada_front/estoque/model/produto.dart';
+import '../../model/model_ordem_produto/produto.dart';
+
+
 
 part 'produto_event.dart';
 part 'produto_state.dart';

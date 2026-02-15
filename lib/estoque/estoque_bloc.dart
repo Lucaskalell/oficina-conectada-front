@@ -3,8 +3,10 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:oficina_conectada_front/estoque/estoque_repository.dart';
 
-import 'model/categoria.dart';
-import 'model/estoque_resumo.dart';
+import '../model/model_ordem_produto/categoria.dart';
+import '../model/model_ordem_produto/estoque_resumo.dart';
+
+
 
 part 'estoque_event.dart';
 part 'estoque_state.dart';

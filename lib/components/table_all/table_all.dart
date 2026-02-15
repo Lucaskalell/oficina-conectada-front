@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../strings/oficina_strings.dart';
+
 /// Um widget de tabela completo, reutilizável e estilizado.
 ///
 /// Oferece funcionalidades como paginação, contador de linhas, ações customizáveis
@@ -177,7 +179,7 @@ class _TableAllState extends State<TableAll> {
     return const Padding(
       padding: EdgeInsets.only(left: 8.0),
       child: Text(
-        'Resultados',
+        OficinaStrings.resultados,
         style: TextStyle(fontWeight: FontWeight.w500, color: Colors.grey),
       ),
     );
@@ -384,7 +386,7 @@ class _TableAllState extends State<TableAll> {
           Icon(Icons.inbox_outlined, size: 60, color: Colors.grey.shade700),
           const SizedBox(height: 16),
           Text(
-            widget.titleEmpty ?? 'Nenhum registro encontrado',
+            widget.titleEmpty ?? OficinaStrings.nenhumRegistroEncontrado,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           if (widget.messageEmpty != null) ...[

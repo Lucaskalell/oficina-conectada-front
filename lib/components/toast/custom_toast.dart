@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:oficina_conectada_front/colors/colors.dart';
+import 'package:oficina_conectada_front/strings/oficina_strings.dart';
 
 enum ToastType { success, warning, error }
 
@@ -94,17 +96,17 @@ class _ToastAnimationState extends State<_ToastAnimation> with SingleTickerProvi
     switch (widget.type) {
       case ToastType.success:
         bgColor = const Color(0xFF1E2A1E);
-        borderColor = Colors.greenAccent;
+        borderColor = ColorsApp.verdeToast;
         icon = Icons.check_circle;
         break;
       case ToastType.warning:
         bgColor = const Color(0xFF2A2418);
-        borderColor = Colors.amberAccent;
+        borderColor = ColorsApp.amareloToast;
         icon = Icons.warning_amber;
         break;
       case ToastType.error:
         bgColor = const Color(0xFF563131);
-        borderColor = Colors.redAccent;
+        borderColor = ColorsApp.vermelhoToast;
         icon = Icons.error_outline;
         break;
     }
@@ -124,7 +126,7 @@ class _ToastAnimationState extends State<_ToastAnimation> with SingleTickerProvi
               border: Border.all(color: borderColor.withOpacity(0.5), width: 1),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.5),
+                  color: ColorsApp.preto.withOpacity(0.5),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 )
@@ -141,8 +143,8 @@ class _ToastAnimationState extends State<_ToastAnimation> with SingleTickerProvi
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        widget.type == ToastType.error ? 'ERRO' :
-                        widget.type == ToastType.warning ? 'ATENÇÃO' : 'SUCESSO',
+                        widget.type == ToastType.error ? OficinaStrings.erro :
+                        widget.type == ToastType.warning ? OficinaStrings.atencao : OficinaStrings.sucesso,
                         style: TextStyle(
                             color: borderColor,
                             fontWeight: FontWeight.bold,

@@ -1,8 +1,13 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:oficina_conectada_front/colors/colors.dart';
 import 'package:oficina_conectada_front/model/add_ordem_de_servico/ordem_de_servico_model.dart';
+import 'package:oficina_conectada_front/model/cliente_model.dart';
+import 'package:oficina_conectada_front/strings/oficina_strings.dart';
 
+import '../../components/toast/custom_toast.dart';
+import '../../model/carro_model.dart';
 import '../ordem_de_servico_repository.dart';
 import 'adicionar_ordem_bloc.dart';
 import 'adicionar_ordem_event.dart';
@@ -20,21 +25,39 @@ class _criarOrdemDeServicoState extends State<CriarOrdemDeServicoPage> {
   final _formKey = GlobalKey<FormState>();
 
   final _placaController = TextEditingController();
-  final _clienteController = TextEditingController();
+  final _clienteNomeController = TextEditingController();
   final _carroController = TextEditingController();
   final _defeitoController = TextEditingController();
   final _descricaoServicoController = TextEditingController();
   final _valorTotalController = TextEditingController();
 
+  bool _isClienteNovo = false;
+  List<ClienteModel> _clientesCadastrados = [];
+  List<CarroModel> _carrosDoCliente = []; // No futuro>
+  int? _selectedClienteId;
+  int? _selectedCarroId; // No futuro, buscar carros do cliente selecionado
+
   @override
   void initState() {
     super.initState();
     _bloc = AdicionarOrdemDeServicoBloc(OrdemDeServicoRepository());
+    _carregarClientes();
+  }
+
+  void _carregarClientes() async {
+    try {
+      final clientes = await OrdemDeServicoRepository().getClientes();
+      setState(() {
+        _clientesCadastrados = clientes;
+      });
+    } catch (e) {
+      debugPrint('Erro ao carregar clientes: $e');
+    }
   }
 
   AppBar _buildAppBar() {
     return AppBar(
-      title: const Text('Nova Ordem de Serviço'),
+      title: const Text(OficinaStrings.novaOrdemDeServico),
       centerTitle: true,
       elevation: 0,
       backgroundColor: ColorsApp.preto,
@@ -47,27 +70,19 @@ class _criarOrdemDeServicoState extends State<CriarOrdemDeServicoPage> {
     );
   }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    TextInputType keyboardType = TextInputType.text,
-    int maxLines = 1,
-  }) {
+  Widget _buildDropdownClientes() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboardType,
-        maxLines: maxLines,
-        style: const TextStyle(color: ColorsApp.branco, fontSize: 16),
+      child: DropdownButtonFormField<int>(
+        value: _selectedClienteId,
+        dropdownColor: ColorsApp.preto,
+        style: const TextStyle(color: ColorsApp.branco),
         decoration: InputDecoration(
-          labelText: label,
+          labelText: OficinaStrings.selecionarCliente,
           labelStyle: const TextStyle(color: Colors.white60),
-          prefixIcon: Icon(icon, color: ColorsApp.azulClaro, size: 22),
+          prefixIcon: const Icon(Icons.person_search, color: ColorsApp.azulClaro),
           filled: true,
           fillColor: Colors.white.withOpacity(0.05),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
@@ -76,18 +91,63 @@ class _criarOrdemDeServicoState extends State<CriarOrdemDeServicoPage> {
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: ColorsApp.azulClaro, width: 2),
           ),
-          errorBorder: OutlineInputBorder(
+        ),
+        items: _clientesCadastrados.map((cliente) {
+          return DropdownMenuItem<int>(
+            value: cliente.id,
+            child: Text(cliente.nome),
+          );
+        }).toList(),
+        onChanged: (value) {
+          setState(() {
+            _selectedClienteId = value;
+            // Aqui você poderia buscar os carros desse cliente para preencher outro dropdown
+          });
+        },
+        validator: (value) => !_isClienteNovo && value == null ? OficinaStrings.selecioneUmCliente : null,
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+    int maxLines = 1,
+    bool enabled = true,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: TextFormField(
+        controller: controller,
+        enabled: enabled,
+        keyboardType: keyboardType,
+        maxLines: maxLines,
+        style: TextStyle(color: enabled ? ColorsApp.branco : Colors.white24, fontSize: 16),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(color: Colors.white60),
+          prefixIcon: Icon(icon, color: enabled ? ColorsApp.azulClaro : Colors.white24, size: 22),
+          filled: true,
+          fillColor: Colors.white.withOpacity(0.05),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          disabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Colors.redAccent),
+            borderSide: BorderSide(color: Colors.white.withOpacity(0.05)),
           ),
-          focusedErrorBorder: OutlineInputBorder(
+          enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Colors.redAccent, width: 2),
+            borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: ColorsApp.azulClaro, width: 2),
           ),
         ),
         validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Por favor, informe o campo $label';
+          if (enabled && (value == null || value.isEmpty)) {
+            return OficinaStrings.porFavorInformeUmCampo.replaceAll('{campo}', label);
           }
           return null;
         },
@@ -118,21 +178,46 @@ class _criarOrdemDeServicoState extends State<CriarOrdemDeServicoPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _sectionTitle('Informações do Cliente'),
-            _buildTextField(
-              controller: _clienteController,
-              label: 'Nome do Cliente',
-              icon: Icons.person_outline,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _sectionTitle(OficinaStrings.informacoesDoCliente),
+                Row(
+                  children: [
+                    const Text(OficinaStrings.novoCliente, style: TextStyle(color: Colors.white70, fontSize: 12)),
+                    Checkbox(
+                      checkColor: ColorsApp.azulEscuro,
+                      value: _isClienteNovo,
+                      activeColor: ColorsApp.verdeClaro,
+                      onChanged: (val) {
+                        setState(() {
+                          _isClienteNovo = val ?? false;
+                          if (_isClienteNovo) _selectedClienteId = null;
+                        });
+                      },
+                    ),
+                  ],
+                )
+              ],
             ),
             
-            _sectionTitle('Dados do Veículo'),
+            _isClienteNovo 
+              ? _buildTextField(
+                  controller: _clienteNomeController,
+                  label: OficinaStrings.nomeDoNovoCliente,
+                  icon: Icons.person_add_alt_1_outlined,
+                )
+              : _buildDropdownClientes(),
+            
+            _sectionTitle(OficinaStrings.dadosDoVeiculo),
+            // TODO: No futuro, se for cliente antigo, buscar dropdown de carros dele
             Row(
               children: [
                 Expanded(
                   flex: 2,
                   child: _buildTextField(
                     controller: _carroController,
-                    label: 'Modelo do Carro',
+                    label: OficinaStrings.modeloDoCarro,
                     icon: Icons.directions_car_filled_outlined,
                   ),
                 ),
@@ -141,28 +226,28 @@ class _criarOrdemDeServicoState extends State<CriarOrdemDeServicoPage> {
                   flex: 1,
                   child: _buildTextField(
                     controller: _placaController,
-                    label: 'Placa',
+                    label: OficinaStrings.placaDoCarro,
                     icon: Icons.pin_outlined,
                   ),
                 ),
               ],
             ),
 
-            _sectionTitle('Detalhes do Serviço'),
+            _sectionTitle(OficinaStrings.detalhesDoServico),
             _buildTextField(
               controller: _defeitoController,
-              label: 'Relato do Problema',
+              label: OficinaStrings.relatoDoProblema,
               icon: Icons.report_problem_outlined,
             ),
             _buildTextField(
               controller: _descricaoServicoController,
-              label: 'Descrição do Serviço Realizado',
+              label: OficinaStrings.descricaoDoServicoRealizado,
               icon: Icons.description_outlined,
               maxLines: 3,
             ),
             _buildTextField(
               controller: _valorTotalController,
-              label: 'Valor Estimado do Serviço',
+              label: OficinaStrings.valorEstimadoDoServico,
               icon: Icons.monetization_on_outlined,
               keyboardType: TextInputType.number,
             ),
@@ -189,14 +274,6 @@ class _criarOrdemDeServicoState extends State<CriarOrdemDeServicoPage> {
             ? [ColorsApp.verdeEscuro, ColorsApp.verde]
             : [ColorsApp.verde, ColorsApp.verdeEscuro],
         ),
-        boxShadow: [
-          if (!isLoading)
-            BoxShadow(
-              color: ColorsApp.verde.withOpacity(0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-        ],
       ),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
@@ -206,30 +283,27 @@ class _criarOrdemDeServicoState extends State<CriarOrdemDeServicoPage> {
         ),
         onPressed: isLoading ? null : _enviarFormulario,
         child: isLoading
-            ? const SizedBox(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
-              )
-            : const Text(
-                'FINALIZAR ORDEM',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.1,
-                ),
-              ),
+            ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white))
+            : const Text(OficinaStrings.finalizarOrdemDeServico, style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
       ),
     );
   }
 
   void _enviarFormulario() {
     if (_formKey.currentState?.validate() ?? false) {
+      
+      if (_isClienteNovo) {
+        // Lógica para criar cliente novo primeiro ou enviar Super DTO
+        // Por enquanto, vamos focar no envio da OS para cliente existente
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Funcionalidade de Novo Cliente em implementação no Service'))
+        );
+        return;
+      }
+
       final novaOrdem = OrdemDeServicoModel(
-        cliente: _clienteController.text,
-        carro: _carroController.text,
-        placa: _placaController.text,
+        clienteId: _selectedClienteId,
+        carroId: 1, // Mock por enquanto, ideal é selecionar o carro do cliente
         defeito: _defeitoController.text,
         descricaoServico: _descricaoServicoController.text,
         valorTotal: double.tryParse(_valorTotalController.text) ?? 0.0,
@@ -244,27 +318,16 @@ class _criarOrdemDeServicoState extends State<CriarOrdemDeServicoPage> {
   Widget build(BuildContext context) {
     return BlocConsumer<AdicionarOrdemDeServicoBloc, AdicionarOrdemState>(
       bloc: _bloc,
-      listener: (context, state) {
-        if (state is AdicionarOrdemSuccessState) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Ordem criada com sucesso!'),
-              backgroundColor: ColorsApp.verdeEscuro,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-          Navigator.pop(context);
-        }
-        if (state is AdicionarOrdemErrorState) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Erro: ${state.message}'),
-              backgroundColor: ColorsApp.vermelho,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-      },
+        listener: (context, state) {
+          if (state is AdicionarOrdemSuccessState) {
+            CustomToast.show(
+              context,
+              message: OficinaStrings.ordemDeServicoCriadaComSucesso,
+              type: ToastType.success,
+            );
+            Navigator.pop(context);
+          }
+        },
       builder: (context, state) {
         return Scaffold(
           backgroundColor: ColorsApp.preto,
@@ -273,17 +336,5 @@ class _criarOrdemDeServicoState extends State<CriarOrdemDeServicoPage> {
         );
       },
     );
-  }
-
-  @override
-  void dispose() {
-    _bloc.close();
-    _placaController.dispose();
-    _clienteController.dispose();
-    _carroController.dispose();
-    _defeitoController.dispose();
-    _descricaoServicoController.dispose();
-    _valorTotalController.dispose();
-    super.dispose();
   }
 }

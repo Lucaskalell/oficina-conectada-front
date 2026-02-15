@@ -46,7 +46,6 @@ class ColorsApp {
   static const Color jade = Color(0xFF00A86B);
   static const Color pistache = Color(0xFF93C572);
   static const Color mostarda = Color(0xFFDAA520);
-  static const Color dourado = Color(0xFFFFD700);
   static const Color marrom = Color(0xFF8B4513);
 
   // Cores Especiais (cromados/brilhantes/diferentes)
@@ -61,4 +60,15 @@ class ColorsApp {
   static const Color esmeralda = Color(0xFF50C878);
   static const Color safira = Color(0xFF0F52BA);
   static const Color rubi = Color(0xFFE0115F);
+
+  //CORES DO TOAST
+
+  //SUCESSO
+  static const Color verdeToast = Color(0xFF69F0AE);
+
+  //ATENÇÃO
+  static const Color amareloToast = Color(0xFFFFD740);
+
+  //ERRO
+  static const Color vermelhoToast = Color(0xFFFF5252);
 }

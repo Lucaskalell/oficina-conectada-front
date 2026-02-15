@@ -5,9 +5,11 @@ import 'package:oficina_conectada_front/dash_board/dash_board_event.dart';
 import 'package:oficina_conectada_front/dash_board/dash_board_repository.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+import '../colors/colors.dart';
 import '../model/model_dash_board/OrdemServicoMock.dart';
 import '../model/model_dash_board/dash_board_model.dart';
 import '../model/model_dash_board/dash_board_semana.dart';
+import '../strings/oficina_strings.dart';
 import 'dash_board_state.dart';
 
 class DashBoardPage extends StatefulWidget {
@@ -32,8 +34,8 @@ class _DashBoardPageState extends State<DashBoardPage> {
 
   Widget _buildTitle() {
     return const Text(
-      'Visão Geral',
-      style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+      OficinaStrings.visaoGeral,
+      style: TextStyle(color: ColorsApp.branco, fontSize: 20, fontWeight: FontWeight.bold),
     );
   }
 
@@ -41,25 +43,25 @@ class _DashBoardPageState extends State<DashBoardPage> {
     return Row(
       children: [
         _KpiCard(
-          title: 'Faturamento (Mês)',
+          title: OficinaStrings.faturamentoMes,
           value: 'R\$ ${data.faturamentoMensal.toStringAsFixed(2)}',
           icon: Icons.monetization_on,
-          color: Colors.green,
+          color: ColorsApp.verde,
         ),
         const SizedBox(width: 16),
         _KpiCard(
-          title: 'O.S Abertas',
+          title: OficinaStrings.osAbertas,
           value: '${data.totalOrdensAbertas}',
           icon: Icons.build,
-          color: Colors.orange,
+          color: ColorsApp.laranja,
           onTap: () => _mostrarModalOrdens(context),
         ),
         const SizedBox(width: 16),
         _KpiCard(
-          title: 'Estoque Critico',
+          title: OficinaStrings.estoqueCritico,
           value: '${data.produtosBaixoEstoque} Itens',
           icon: Icons.warning,
-          color: Colors.red,
+          color: ColorsApp.vermelho,
         ),
       ],
     );
@@ -82,22 +84,22 @@ class _DashBoardPageState extends State<DashBoardPage> {
   Widget _buildVendasChart(List<VendaSemana> vendas) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(color: ColorsApp.preto, borderRadius: BorderRadius.circular(16)),
       child: SfCartesianChart(
         title: ChartTitle(
-          text: 'Faturamento Semanal',
-          textStyle: const TextStyle(color: Colors.white, fontSize: 14),
+          text: OficinaStrings.faturamentoSemanal,
+          textStyle: const TextStyle(color: ColorsApp.branco, fontSize: 14),
         ),
-        primaryXAxis: CategoryAxis(labelStyle: const TextStyle(color: Colors.grey)),
-        primaryYAxis: NumericAxis(labelStyle: const TextStyle(color: Colors.grey)),
+        primaryXAxis: CategoryAxis(labelStyle: const TextStyle(color: ColorsApp.cinza)),
+        primaryYAxis: NumericAxis(labelStyle: const TextStyle(color: ColorsApp.cinza)),
         tooltipBehavior: TooltipBehavior(enable: true, header: '', canShowMarker: false),
         series: <CartesianSeries<VendaSemana, String>>[
           ColumnSeries<VendaSemana, String>(
             dataSource: vendas,
             xValueMapper: (VendaSemana sales, _) => sales.dia,
             yValueMapper: (VendaSemana sales, _) => sales.valor,
-            name: 'Vendas',
-            color: Colors.blueAccent,
+            name: OficinaStrings.vendas,
+            color: ColorsApp.azulClaro,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
           ),
         ],
@@ -131,12 +133,12 @@ class _DashBoardPageState extends State<DashBoardPage> {
       ),
       child: SfCircularChart(
         title: ChartTitle(
-          text: 'Status das O.S.',
-          textStyle: const TextStyle(color: Colors.white, fontSize: 14),
+          text: OficinaStrings.statusDaOs,
+          textStyle: const TextStyle(color: ColorsApp.branco, fontSize: 14),
         ),
         legend: Legend(
           isVisible: true,
-          textStyle: const TextStyle(color: Colors.white),
+          textStyle: const TextStyle(color: ColorsApp.branco),
           position: LegendPosition.bottom,
         ),
         series: <CircularSeries>[
@@ -148,7 +150,7 @@ class _DashBoardPageState extends State<DashBoardPage> {
             innerRadius: '60%',
             dataLabelSettings: const DataLabelSettings(
               isVisible: true,
-              textStyle: TextStyle(color: Colors.white, fontSize: 10),
+              textStyle: TextStyle(color: ColorsApp.branco, fontSize: 10),
             ),
           ),
         ],
@@ -177,11 +179,11 @@ class _DashBoardPageState extends State<DashBoardPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, color: Colors.red, size: 40),
+          const Icon(Icons.error_outline, color: ColorsApp.vermelho, size: 40),
           const SizedBox(height: 10),
-          Text(message, style: const TextStyle(color: Colors.white)),
+          Text(message, style: const TextStyle(color: ColorsApp.branco)),
           const SizedBox(height: 10),
-          ElevatedButton(onPressed: _loadData, child: const Text('Tentar Novamente')),
+          ElevatedButton(onPressed: _loadData, child: const Text(OficinaStrings.tentarNovamente)),
         ],
       ),
     );
@@ -192,7 +194,7 @@ class _DashBoardPageState extends State<DashBoardPage> {
       bloc: _dashboardBloc,
       builder: (context, state) {
         if (state is DashboardLoading) {
-          return const Center(child: CircularProgressIndicator(color: Colors.blueAccent));
+          return const Center(child: CircularProgressIndicator(color: ColorsApp.azulClaro));
         } else if (state is DashboardLoaded) {
           return _buildBody(state.data);
         } else if (state is DashboardError) {
@@ -263,7 +265,7 @@ class _DashBoardPageState extends State<DashBoardPage> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: const Color(0xFF1E1E1E),
-          title: const Text('Ordens em Aberto', style: TextStyle(color: Colors.white)),
+          title: const Text(OficinaStrings.ordensEmAberto, style: TextStyle(color: ColorsApp.branco)),
           content: SizedBox(
             width: 500,
             height: 400,
@@ -278,7 +280,7 @@ class _DashBoardPageState extends State<DashBoardPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Fechar', style: TextStyle(color: Colors.grey)),
+              child: const Text(OficinaStrings.fechar, style: TextStyle(color: ColorsApp.cinza)),
             ),
           ],
         );
@@ -296,7 +298,7 @@ class _DashBoardPageState extends State<DashBoardPage> {
         icon = Icons.elevator;
         color = Colors.blueAccent;
         trailing = const Tooltip(
-          message: 'No Elevador (Em serviço)',
+          message: OficinaStrings.noElevadorEmServico,
           child: Icon(Icons.build, color: Colors.blueAccent),
         );
         break;
@@ -304,7 +306,7 @@ class _DashBoardPageState extends State<DashBoardPage> {
         icon = Icons.garage;
         color = Colors.orangeAccent;
         trailing = const Tooltip(
-          message: 'No Pátio (Aguardando)',
+          message: OficinaStrings.noPatioAguardando,
           child: Icon(Icons.access_time, color: Colors.orangeAccent),
         );
         break;
@@ -367,8 +369,8 @@ class _DashBoardPageState extends State<DashBoardPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Deseja finalizar a O.S. e enviar esta mensagem?',
-                style: TextStyle(color: Colors.grey),
+                OficinaStrings.desejaFinalizarOSeEnviarEstaMensagem,
+                style: TextStyle(color: ColorsApp.cinza),
               ),
               const SizedBox(height: 16),
               Container(
@@ -392,15 +394,14 @@ class _DashBoardPageState extends State<DashBoardPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar', style: TextStyle(color: Colors.redAccent)),
+              child: const Text(OficinaStrings.cancelar, style: TextStyle(color: Colors.redAccent)),
             ),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
               icon: const Icon(Icons.send, color: Colors.white, size: 18),
-              label: const Text('Sim, Enviar', style: TextStyle(color: Colors.white)),
+              label: const Text(OficinaStrings.simEnviar, style: TextStyle(color: Colors.white)),
               onPressed: () {
-                print('Enviando mensagem para ${os.cliente}...');
-
+                debugPrint('${OficinaStrings.enviandoMensagemPara} ${os.cliente}...');
                 // TODO: Chamar BLoC para mudar status para "Entregue/Baixado"
 
                 Navigator.pop(context);

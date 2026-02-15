@@ -3,6 +3,8 @@ import 'package:oficina_conectada_front/enum/enum_ordem_de_servico.dart';
 
 class OrdemDeServicoModel {
   final int? id;
+  final int? clienteId; // NOVO
+  final int? carroId;    // NOVO
   final StatusOrdemDeServico status;
   final String? placa;
   final String? cliente;
@@ -14,6 +16,8 @@ class OrdemDeServicoModel {
 
   OrdemDeServicoModel({
     this.id,
+    this.clienteId,
+    this.carroId,
     this.status = StatusOrdemDeServico.EM_ANDAMENTO,
     this.placa,
     this.cliente,
@@ -26,29 +30,26 @@ class OrdemDeServicoModel {
 
   factory OrdemDeServicoModel.fromJson(Map<String, dynamic> json) {
     return OrdemDeServicoModel(
-      id: json['id'] ?? 0,
+      id: json['id'],
       defeito: json['defeito'] ?? '',
       descricaoServico: json['descricaoServico'] ?? '',
       valorTotal: (json['valorTotal'] ?? 0).toDouble(),
       placa: json['placa'] ?? '',
-      cliente: json['cliente'] ?? '',
-      carro: json['carro'] ?? '',
+      cliente: json['cliente'] ?? '', // O DTO de resposta do Java envia o nome aqui
+      carro: json['carro'] ?? '',     // O DTO de resposta do Java envia o modelo aqui
       entrada: json['entrada'] != null ? DateTime.parse(json['entrada']) : null,
       status: StatusOrdemDeServico.values.firstWhere(
             (status) => status.name == (json['status'] ?? ''),
         orElse: () => StatusOrdemDeServico.EM_ANDAMENTO,
       ),
     );
-    }
+  }
 
+  // Este método deve gerar o JSON que o CriarOrdemDeServicoRequest do Java espera
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'status': status.name,
-      'placa': placa,
-      'cliente': cliente,
-      'carro': carro,
-      'entrada': entrada?.toIso8601String(),
+      'clienteId': clienteId,
+      'carroId': carroId,
       'defeito': defeito,
       'descricaoServico': descricaoServico,
       'valorTotal': valorTotal,

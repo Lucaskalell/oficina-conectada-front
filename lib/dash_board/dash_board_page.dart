@@ -112,11 +112,11 @@ class _DashBoardPageState extends State<DashBoardPage> {
       final String key = entry.key.toLowerCase();
       Color color;
       if (key.contains('conclu')) {
-        color = Colors.greenAccent;
+        color = ColorsApp.verdeEscuro;
       } else if (key.contains('andamento')) {
         color = Colors.blueAccent;
       } else if (key.contains('pendente')) {
-        color = Colors.orangeAccent;
+        color = ColorsApp.laranja;
       } else {
         color = Colors.grey;
       }
@@ -147,10 +147,10 @@ class _DashBoardPageState extends State<DashBoardPage> {
             xValueMapper: (_ChartData d, _) => d.x,
             yValueMapper: (_ChartData d, _) => d.y,
             pointColorMapper: (_ChartData d, _) => d.color,
-            innerRadius: '60%',
+            innerRadius: '50%',
             dataLabelSettings: const DataLabelSettings(
               isVisible: true,
-              textStyle: TextStyle(color: ColorsApp.branco, fontSize: 10),
+              textStyle: TextStyle(color: ColorsApp.branco, fontSize: 15),
             ),
           ),
         ],
@@ -173,6 +173,7 @@ class _DashBoardPageState extends State<DashBoardPage> {
       ),
     );
   }
+
 
   Widget _buildError(String message) {
     return Center(

@@ -1,13 +1,13 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:oficina_conectada_front/colors/colors.dart';
 import 'package:oficina_conectada_front/model/add_ordem_de_servico/ordem_de_servico_model.dart';
 import 'package:oficina_conectada_front/model/cliente_model.dart';
+import 'package:oficina_conectada_front/model/carro_model.dart';
+import 'package:oficina_conectada_front/ordem_de_servico/modais/editar_ordem_de_servico_page.dart';
 import 'package:oficina_conectada_front/strings/oficina_strings.dart';
+import 'package:oficina_conectada_front/components/toast/custom_toast.dart';
 
-import '../../components/toast/custom_toast.dart';
-import '../../model/carro_model.dart';
 import '../ordem_de_servico_repository.dart';
 import 'adicionar_ordem_bloc.dart';
 import 'adicionar_ordem_event.dart';
@@ -26,85 +26,304 @@ class _criarOrdemDeServicoState extends State<CriarOrdemDeServicoPage> {
 
   final _placaController = TextEditingController();
   final _clienteNomeController = TextEditingController();
-  final _carroController = TextEditingController();
+  final _carroModeloController = TextEditingController();
   final _defeitoController = TextEditingController();
   final _descricaoServicoController = TextEditingController();
   final _valorTotalController = TextEditingController();
 
   bool _isClienteNovo = false;
   List<ClienteModel> _clientesCadastrados = [];
-  List<CarroModel> _carrosDoCliente = []; // No futuro>
+  List<CarroModel> _carrosDoCliente = [];
+
   int? _selectedClienteId;
-  int? _selectedCarroId; // No futuro, buscar carros do cliente selecionado
+  int? _selectedCarroId;
 
   @override
   void initState() {
     super.initState();
     _bloc = AdicionarOrdemDeServicoBloc(OrdemDeServicoRepository());
-    _carregarClientes();
+    _bloc.add(CarregarClientesEvent());
   }
 
-  void _carregarClientes() async {
-    try {
-      final clientes = await OrdemDeServicoRepository().getClientes();
-      setState(() {
-        _clientesCadastrados = clientes;
-      });
-    } catch (e) {
-      debugPrint('Erro ao carregar clientes: $e');
+  @override
+  void dispose() {
+    _placaController.dispose();
+    _clienteNomeController.dispose();
+    _carroModeloController.dispose();
+    _defeitoController.dispose();
+    _descricaoServicoController.dispose();
+    _valorTotalController.dispose();
+    _bloc.close();
+    super.dispose();
+  }
+
+  void _enviarFormulario() {
+    if (_formKey.currentState?.validate() ?? false) {
+      final novaOrdem = OrdemDeServicoModel(
+        clienteId: _selectedClienteId,
+        carroId: _selectedCarroId,
+        defeito: _defeitoController.text,
+        descricaoServico: _descricaoServicoController.text,
+        valorTotal: double.tryParse(_valorTotalController.text) ?? 0.0,
+      );
+
+      _bloc.add(CriarOrdemDeServicoEvent(novaOrdem));
     }
   }
 
-  AppBar _buildAppBar() {
-    return AppBar(
-      title: const Text(OficinaStrings.novaOrdemDeServico),
-      centerTitle: true,
-      elevation: 0,
-      backgroundColor: ColorsApp.preto,
-      iconTheme: const IconThemeData(color: ColorsApp.branco),
-      titleTextStyle: const TextStyle(
-        color: ColorsApp.branco,
-        fontSize: 22,
-        fontWeight: FontWeight.bold,
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<AdicionarOrdemDeServicoBloc, AdicionarOrdemState>(
+      bloc: _bloc,
+      listener: (context, state) {
+        if (state is ClientesCarregadosState) {
+          _clientesCadastrados = state.clientes;
+        } else if (state is DadosClienteCompletoCarregadosState) {
+          _carrosDoCliente = state.carros;
+        } else if (state is AdicionarOrdemSuccessState) {
+          CustomToast.show(
+            context,
+            message: OficinaStrings.ordemDeServicoCriadaComSucesso,
+            type: ToastType.success,
+          );
+          Navigator.pop(context, true);
+        } else if (state is AdicionarOrdemErrorState) {
+          CustomToast.show(context, message: state.message, type: ToastType.error);
+        }
+      },
+      builder: (context, state) {
+        final isLoading = state is AdicionarOrdemLoadingState;
+
+        return Scaffold(
+          backgroundColor: ColorsApp.preto,
+          appBar: AppBar(
+            title: const Text(OficinaStrings.novaOrdemDeServico),
+            backgroundColor: ColorsApp.preto,
+          ),
+          body: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildClienteSection(),
+                  _buildVeiculoSection(),
+                  _buildServicoSection(),
+                  const SizedBox(height: 32),
+                  _buildSubmitButton(isLoading),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildClienteSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              OficinaStrings.informacoesDoCliente.toUpperCase(),
+              style: const TextStyle(color: ColorsApp.azulClaro, fontWeight: FontWeight.bold),
+            ),
+            Row(
+              children: [
+                const Text(OficinaStrings.novoCliente, style: TextStyle(color: Colors.white70)),
+                Checkbox(
+                  value: _isClienteNovo,
+                 onChanged: (v){
+                    setState(()=>_isClienteNovo = v!); {
+                      if(v==true){
+                        _abrirModalNovoCliente();
+                      }
+                    }
+                 },
+                ),
+              ],
+            ),
+          ],
+        ),
+        _isClienteNovo
+            ? _buildTextField(
+                controller: _clienteNomeController,
+                label: OficinaStrings.nomeDoNovoCliente,
+                icon: Icons.person_add,
+              )
+            : _buildDropdownClientes(),
+      ],
+    );
+  }
+
+  void _abrirModalNovoCliente() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: SizedBox(
+          width: 600,
+          height: 500,
+          child:SingleChildScrollView(
+          child: const EditarOrdemDeServicoPage(),
+        ),
+        ),
       ),
     );
   }
 
+  Widget _buildVeiculoSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          OficinaStrings.dadosDoVeiculo.toUpperCase(),
+          style: const TextStyle(color: ColorsApp.azulClaro, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        _buildDropdownCarros(),
+        if (_isClienteNovo) ...[
+          _buildTextField(
+            controller: _carroModeloController,
+            label: OficinaStrings.modeloDoCarro,
+            icon: Icons.directions_car,
+          ),
+          _buildTextField(
+            controller: _placaController,
+            label: OficinaStrings.placaDoCarro,
+            icon: Icons.pin,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildServicoSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          OficinaStrings.detalhesDoServico.toUpperCase(),
+          style: const TextStyle(color: ColorsApp.azulClaro, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        _buildTextField(
+          controller: _defeitoController,
+          label: OficinaStrings.relatoDoProblema,
+          icon: Icons.report_problem,
+        ),
+        _buildTextField(
+          controller: _descricaoServicoController,
+          label: OficinaStrings.descricaoDoServicoRealizado,
+          icon: Icons.description,
+          maxLines: 3,
+        ),
+        _buildTextField(
+          controller: _valorTotalController,
+          label: OficinaStrings.valorEstimadoDoServico,
+          icon: Icons.monetization_on,
+          keyboardType: TextInputType.number,
+        ),
+      ],
+    );
+  }
+
   Widget _buildDropdownClientes() {
+    return _buildDropdownField<int>(
+      label: OficinaStrings.selecionarCliente,
+      value: _selectedClienteId,
+      icon: Icons.person_search,
+      items: _clientesCadastrados
+          .map((c) => DropdownMenuItem(value: c.id, child: Text(c.nome)))
+          .toList(),
+      onChanged: (value) {
+        setState(() {
+          _selectedClienteId = value;
+          _selectedCarroId = null;
+          _carrosDoCliente = [];
+          if (value != null) _bloc.add(CarregarDadosClienteCompletoEvent(value));
+        });
+      },
+      validator: (value) =>
+          !_isClienteNovo && value == null ? OficinaStrings.selecioneUmCliente : null,
+    );
+  }
+
+  Widget _buildDropdownCarros() {
+    if (_isClienteNovo) return const SizedBox.shrink();
+    return _buildDropdownField<int>(
+      label: OficinaStrings.dadosDoVeiculo,
+      value: _selectedCarroId,
+      icon: Icons.directions_car_filled_outlined,
+      items: _carrosDoCliente
+          .map((c) => DropdownMenuItem(value: c.id, child: Text('${c.modelo} (${c.placa})')))
+          .toList(),
+      onChanged: (value) {
+        setState(() {
+          _selectedCarroId = value;
+          final carro = _carrosDoCliente.firstWhere((c) => c.id == value);
+          _placaController.text = carro.placa;
+          _carroModeloController.text = carro.modelo;
+        });
+      },
+      validator: (value) => !_isClienteNovo && value == null ? OficinaStrings.dadosDoVeiculo : null,
+    );
+  }
+
+  Widget _buildSubmitButton(bool isLoading) {
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: isLoading ? null : _enviarFormulario,
+        child: isLoading
+            ? const CircularProgressIndicator(color: Colors.white)
+            : Text(OficinaStrings.finalizarOrdemDeServico.toUpperCase()),
+      ),
+    );
+  }
+
+  Widget _buildDropdownField<T>({
+    required String label,
+    required T? value,
+    required IconData icon,
+    required List<DropdownMenuItem<T>> items,
+    required ValueChanged<T?> onChanged,
+    String? Function(T?)? validator,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
-      child: DropdownButtonFormField<int>(
-        value: _selectedClienteId,
+      child: DropdownButtonFormField<T>(
+        value: value,
         dropdownColor: ColorsApp.preto,
         style: const TextStyle(color: ColorsApp.branco),
-        decoration: InputDecoration(
-          labelText: OficinaStrings.selecionarCliente,
-          labelStyle: const TextStyle(color: Colors.white60),
-          prefixIcon: const Icon(Icons.person_search, color: ColorsApp.azulClaro),
-          filled: true,
-          fillColor: Colors.white.withOpacity(0.05),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: ColorsApp.azulClaro, width: 2),
-          ),
-        ),
-        items: _clientesCadastrados.map((cliente) {
-          return DropdownMenuItem<int>(
-            value: cliente.id,
-            child: Text(cliente.nome),
-          );
-        }).toList(),
-        onChanged: (value) {
-          setState(() {
-            _selectedClienteId = value;
-            // Aqui você poderia buscar os carros desse cliente para preencher outro dropdown
-          });
-        },
-        validator: (value) => !_isClienteNovo && value == null ? OficinaStrings.selecioneUmCliente : null,
+        decoration: _getInputDecoration(label, icon),
+        items: items,
+        onChanged: onChanged,
+        validator: validator,
+      ),
+    );
+  }
+
+  InputDecoration _getInputDecoration(String label, IconData icon, {bool enabled = true}) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: Colors.white60),
+      prefixIcon: Icon(icon, color: enabled ? ColorsApp.azulClaro : Colors.white24, size: 22),
+      filled: true,
+      fillColor: Colors.white.withOpacity(0.05),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: ColorsApp.azulClaro, width: 2),
       ),
     );
   }
@@ -124,217 +343,11 @@ class _criarOrdemDeServicoState extends State<CriarOrdemDeServicoPage> {
         enabled: enabled,
         keyboardType: keyboardType,
         maxLines: maxLines,
-        style: TextStyle(color: enabled ? ColorsApp.branco : Colors.white24, fontSize: 16),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: const TextStyle(color: Colors.white60),
-          prefixIcon: Icon(icon, color: enabled ? ColorsApp.azulClaro : Colors.white24, size: 22),
-          filled: true,
-          fillColor: Colors.white.withOpacity(0.05),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          disabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.white.withOpacity(0.05)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: ColorsApp.azulClaro, width: 2),
-          ),
-        ),
-        validator: (value) {
-          if (enabled && (value == null || value.isEmpty)) {
-            return OficinaStrings.porFavorInformeUmCampo.replaceAll('{campo}', label);
-          }
-          return null;
-        },
+        style: TextStyle(color: enabled ? ColorsApp.branco : Colors.white24),
+        decoration: _getInputDecoration(label, icon, enabled: enabled),
+        validator: (value) =>
+            enabled && (value == null || value.isEmpty) ? OficinaStrings.obrigatorio : null,
       ),
-    );
-  }
-
-  Widget _sectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16, top: 8),
-      child: Text(
-        title.toUpperCase(),
-        style: const TextStyle(
-          color: ColorsApp.azulClaro,
-          fontSize: 14,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1.2,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBody(AdicionarOrdemState state) {
-    return Form(
-      key: _formKey,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _sectionTitle(OficinaStrings.informacoesDoCliente),
-                Row(
-                  children: [
-                    const Text(OficinaStrings.novoCliente, style: TextStyle(color: Colors.white70, fontSize: 12)),
-                    Checkbox(
-                      checkColor: ColorsApp.azulEscuro,
-                      value: _isClienteNovo,
-                      activeColor: ColorsApp.verdeClaro,
-                      onChanged: (val) {
-                        setState(() {
-                          _isClienteNovo = val ?? false;
-                          if (_isClienteNovo) _selectedClienteId = null;
-                        });
-                      },
-                    ),
-                  ],
-                )
-              ],
-            ),
-            
-            _isClienteNovo 
-              ? _buildTextField(
-                  controller: _clienteNomeController,
-                  label: OficinaStrings.nomeDoNovoCliente,
-                  icon: Icons.person_add_alt_1_outlined,
-                )
-              : _buildDropdownClientes(),
-            
-            _sectionTitle(OficinaStrings.dadosDoVeiculo),
-            // TODO: No futuro, se for cliente antigo, buscar dropdown de carros dele
-            Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: _buildTextField(
-                    controller: _carroController,
-                    label: OficinaStrings.modeloDoCarro,
-                    icon: Icons.directions_car_filled_outlined,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  flex: 1,
-                  child: _buildTextField(
-                    controller: _placaController,
-                    label: OficinaStrings.placaDoCarro,
-                    icon: Icons.pin_outlined,
-                  ),
-                ),
-              ],
-            ),
-
-            _sectionTitle(OficinaStrings.detalhesDoServico),
-            _buildTextField(
-              controller: _defeitoController,
-              label: OficinaStrings.relatoDoProblema,
-              icon: Icons.report_problem_outlined,
-            ),
-            _buildTextField(
-              controller: _descricaoServicoController,
-              label: OficinaStrings.descricaoDoServicoRealizado,
-              icon: Icons.description_outlined,
-              maxLines: 3,
-            ),
-            _buildTextField(
-              controller: _valorTotalController,
-              label: OficinaStrings.valorEstimadoDoServico,
-              icon: Icons.monetization_on_outlined,
-              keyboardType: TextInputType.number,
-            ),
-            
-            const SizedBox(height: 32),
-            _buildSubmitButton(state),
-            const SizedBox(height: 40),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSubmitButton(AdicionarOrdemState state) {
-    final isLoading = state is AdiconaroOrdemLoadingState;
-
-    return Container(
-      width: double.infinity,
-      height: 56,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(
-          colors: isLoading 
-            ? [ColorsApp.verdeEscuro, ColorsApp.verde]
-            : [ColorsApp.verde, ColorsApp.verdeEscuro],
-        ),
-      ),
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        ),
-        onPressed: isLoading ? null : _enviarFormulario,
-        child: isLoading
-            ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white))
-            : const Text(OficinaStrings.finalizarOrdemDeServico, style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-      ),
-    );
-  }
-
-  void _enviarFormulario() {
-    if (_formKey.currentState?.validate() ?? false) {
-      
-      if (_isClienteNovo) {
-        // Lógica para criar cliente novo primeiro ou enviar Super DTO
-        // Por enquanto, vamos focar no envio da OS para cliente existente
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Funcionalidade de Novo Cliente em implementação no Service'))
-        );
-        return;
-      }
-
-      final novaOrdem = OrdemDeServicoModel(
-        clienteId: _selectedClienteId,
-        carroId: 1, // Mock por enquanto, ideal é selecionar o carro do cliente
-        defeito: _defeitoController.text,
-        descricaoServico: _descricaoServicoController.text,
-        valorTotal: double.tryParse(_valorTotalController.text) ?? 0.0,
-        entrada: DateTime.now(),
-      );
-
-      _bloc.add(CriarOrdemDeServico(novaOrdem));
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocConsumer<AdicionarOrdemDeServicoBloc, AdicionarOrdemState>(
-      bloc: _bloc,
-        listener: (context, state) {
-          if (state is AdicionarOrdemSuccessState) {
-            CustomToast.show(
-              context,
-              message: OficinaStrings.ordemDeServicoCriadaComSucesso,
-              type: ToastType.success,
-            );
-            Navigator.pop(context);
-          }
-        },
-      builder: (context, state) {
-        return Scaffold(
-          backgroundColor: ColorsApp.preto,
-          appBar: _buildAppBar(),
-          body: _buildBody(state),
-        );
-      },
     );
   }
 }

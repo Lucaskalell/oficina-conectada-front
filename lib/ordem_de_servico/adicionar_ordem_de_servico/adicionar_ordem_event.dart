@@ -1,10 +1,23 @@
 
 import '../../model/add_ordem_de_servico/ordem_de_servico_model.dart';
 
-abstract class AdicionarOrdemEvent{}
+abstract class AdicionarOrdemEvent {}
 
-class CriarOrdemDeServico extends AdicionarOrdemEvent {
-  final OrdemDeServicoModel criarOrdemDeServico;
-  CriarOrdemDeServico(this.criarOrdemDeServico);
+class CarregarClientesEvent extends AdicionarOrdemEvent {}
+
+class CarregarDadosClienteCompletoEvent extends AdicionarOrdemEvent {
+  final int clienteId;
+  CarregarDadosClienteCompletoEvent(this.clienteId);
 }
-class CarregarOrdemDeServico extends AdicionarOrdemEvent {}
+
+class CriarOrdemDeServicoEvent extends AdicionarOrdemEvent {
+  final OrdemDeServicoModel ordemDeServico;
+  CriarOrdemDeServicoEvent(this.ordemDeServico);
+}
+
+
+class CriarOSComNovoClienteEvent extends AdicionarOrdemEvent{
+  final Map<String, dynamic> clienteCarroData;
+  final OrdemDeServicoModel ordemDeServico;
+  CriarOSComNovoClienteEvent(this.clienteCarroData, this.ordemDeServico);
+}

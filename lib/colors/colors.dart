@@ -11,6 +11,8 @@ class ColorsApp {
   static const Color bege = Color(0xFFF5F5DC);
   static const Color creme = Color(0xFFFFFDD0);
   static const Color areia = Color(0xFFEDC9AF);
+  static const Color transparente = Color(0x00000000);
+
 
   // Cores Quentes
   static const Color vermelho = Color(0xFFFF0000);

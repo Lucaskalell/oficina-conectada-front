@@ -1,19 +1,26 @@
-import 'package:oficina_conectada_front/model/add_ordem_de_servico/ordem_de_servico_model.dart';
+
+import 'package:oficina_conectada_front/model/cliente_model.dart';
+import 'package:oficina_conectada_front/model/carro_model.dart';
 
 abstract class AdicionarOrdemState {}
 
 class AdicionarOrdemInitialState extends AdicionarOrdemState {}
 
-class AdiconaroOrdemLoadingState extends AdicionarOrdemState {}
+class AdicionarOrdemLoadingState extends AdicionarOrdemState {}
 
-
-
-class AdicionarOrdemSuccessState extends AdicionarOrdemState {
-  final OrdemDeServicoModel ordemServico;
-  AdicionarOrdemSuccessState(this.ordemServico);
+// Estado que entrega a lista inicial de clientes
+class ClientesCarregadosState extends AdicionarOrdemState {
+  final List<ClienteModel> clientes;
+  ClientesCarregadosState(this.clientes);
 }
 
+// Estado que entrega os carros do cliente selecionado
+class DadosClienteCompletoCarregadosState extends AdicionarOrdemState {
+  final List<CarroModel> carros;
+  DadosClienteCompletoCarregadosState(this.carros);
+}
 
+class AdicionarOrdemSuccessState extends AdicionarOrdemState {}
 
 class AdicionarOrdemErrorState extends AdicionarOrdemState {
   final String message;

@@ -8,6 +8,8 @@ class OficinaStrings {
   // BLOCO C
   static const String clienteSelecionado = 'Cliente Selecionado';
   static const String cancelar = 'Cancelar';
+  static const String cliente = 'Cliente';
+  static const String carro = 'Carro';
 
   // BLOCO D
   static const String dadosDoVeiculo = 'Dados do Veículo';
@@ -15,6 +17,10 @@ class OficinaStrings {
   static const String detalhesDoServico = 'Detalhes do Serviço';
   static const String desejaFinalizarOSeEnviarEstaMensagem =
       'Deseja finalizar a O.S. e enviar esta mensagem?';
+  static const String dadosDoProprietario = 'Dados do Proprietário';
+  static const String detalhesDaOrdem = 'DETALHES DA ORDEM ';
+
+
 
   // BLOCO E
   static const String erro = 'ERRO';
@@ -60,10 +66,16 @@ class OficinaStrings {
   static const String ordemDeServicoSelecionada = 'Ordem de Serviço Selecionada';
   static const String osAbertas = 'O.S Abertas';
   static const String ordensEmAberto = 'Ordens em Aberto';
+  static const String obrigatorio = 'Obrigatório';
+  static const String osFotos = 'O.S/Fotos';
 
   // BLOCO P
   static const String placaDoCarro = 'Placa do Carro';
   static const String porFavorInformeUmCampo = 'Por favor informe um campo';
+  static const String porFavorPreenchaOsCamposObrigatorios =
+      'Por favor preencha os campos obrigatórios';
+  static const String proximoCarro = 'Próximo Carro';
+
 
   //BLOCO Q
 

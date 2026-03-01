@@ -1,4 +1,4 @@
-🚗 Oficina Conectada (Frontend)
+ Oficina Conectada (Frontend)
 
 Desenvolvido por Lucas Kalell 
 
@@ -14,13 +14,13 @@ Tela de Login (Web)
 Dashboard/Shell (Web Responsivo)
 
 
-✨ Visão Geral do Projeto
+ Visão Geral do Projeto
 
 A "Oficina Conectada" é uma solução full-stack (Backend + Frontend) para modernizar o gerenciamento de oficinas mecânicas. O sistema foca em transparência e comunicação com o cliente, fornecendo um dashboard de gestão para o mecânico e, futuramente, notificações em tempo real (via WhatsApp/Email) para o cliente.
 
 Este projeto está sendo construído do zero, com foco em boas práticas de arquitetura e "memória muscular cerebral" para ambientes de desenvolvimento profissionais.
 
-🚀 Funcionalidades Atuais 
+ Funcionalidades Atuais 
 
 Até o momento, o "alicerce" completo da aplicação está 100% funcional.
 
@@ -96,7 +96,7 @@ Em Telas Pequenas (Mobile): Esconde o Drawer e mostra o menu "hambúrguer" padr�
 
 O "Shell" já contém o layout da AppBar (com o avatar e botão + Nova OS) e do Drawer (com os links de navegação).
 
-🛠️ Como Executar (Ambiente de Dev)
+ Como Executar (Ambiente de Dev)
 
 Para rodar este projeto, você precisa clonar ambos os repositórios (frontend e backend) e ter o MySQL Server instalado.
 

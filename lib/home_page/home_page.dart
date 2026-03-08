@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:oficina_conectada_front/cliente_cadastro/cliente_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:oficina_conectada_front/dash_board/dash_board_page.dart';
+import 'package:oficina_conectada_front/estoque/estoque_page.dart';
+import 'package:oficina_conectada_front/ordem_de_servico/ordem_de_servico_page.dart';
 
-import '../dash_board/dash_board_page.dart';
-import '../estoque/estoque_page.dart';
-import '../ordem_de_servico/ordem_de_servico_page.dart';
+import '../carro_cadastro/carro_cadastro_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -26,12 +28,12 @@ class _HomePageState extends State<HomePage> {
   final Color _textForeground = const Color(0xFFFAFAFA); // Branco
   final Color _textMuted = const Color(0xFFA1A1AA); // Cinza texto
 
-  // Expandimos a lista de futuras melhorias que vou colocar
+  // Expandi a lista de futuras melhorias que vou colocar
   final List<Widget> _screens = [
     const DashBoardPage(), // 0
-    const OrdemServicoPage(), // 1 (Substitua pela sua OrdemServicoPage)
-    const Center(child: Text('Página: Clientes', style: TextStyle(fontSize: 24, color: Colors.grey))), // 2
-    const Center(child: Text('Página: Veículos', style: TextStyle(fontSize: 24, color: Colors.grey))), // 3
+    const OrdemServicoPage(), // 1
+    const ClientesPage(), // 2
+    const VeiculosPage(),// 3
     const EstoquePage(), // 4
     const Center(child: Text('Página: Financeiro', style: TextStyle(fontSize: 24, color: Colors.grey))), // 5
     const Center(child: Text('Página: Agenda', style: TextStyle(fontSize: 24, color: Colors.grey))), // 6

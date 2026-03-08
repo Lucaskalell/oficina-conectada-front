@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../colors/colors.dart';
-import '../../components/card_tab_animated/card_tab_animated.dart';
-import '../../enum/enum_ordem_de_servico.dart';
-import '../../model/add_ordem_de_servico/ordem_de_servico_model.dart';
+import 'package:oficina_conectada_front/colors/colors.dart';
+import 'package:oficina_conectada_front/model/add_ordem_de_servico/ordem_de_servico_model.dart';
+import 'package:oficina_conectada_front/enum/enum_ordem_de_servico.dart';
 import '../adicionar_ordem_de_servico/adicionar_ordem_bloc.dart';
 import '../adicionar_ordem_de_servico/adicionar_ordem_event.dart';
 
@@ -16,214 +14,266 @@ class EditarOrdemDeServicoPage extends StatefulWidget {
 }
 
 class _EditarOrdemDeServicoPageState extends State<EditarOrdemDeServicoPage> {
-  final GlobalKey<CardTabAnimatedState> _cardTabKey = GlobalKey<CardTabAnimatedState>();
+  final _formKey = GlobalKey<FormState>();
 
-  // Forms para cada passo do cadastro
-  final _formCliente = GlobalKey<FormState>();
-  final _formCarro = GlobalKey<FormState>();
-  final _formServico = GlobalKey<FormState>();
-
-  // Controllers para capturar TUDO do novo cliente
+  // Controllers Pessoais
   final _nomeController = TextEditingController();
-  final _cpfController = TextEditingController(); // Opcional
-  final _placaController = TextEditingController();
+  final _cpfController = TextEditingController();
+  final _telefoneController = TextEditingController();
+  final _emailController = TextEditingController();
+
+  // Controllers Veículo
   final _modeloController = TextEditingController();
-  final _defeitoController = TextEditingController();
-  final _valorController = TextEditingController();
+  final _placaController = TextEditingController();
+  final _anoController = TextEditingController();
+  final _corController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nomeController.dispose();
+    _cpfController.dispose();
+    _telefoneController.dispose();
+    _emailController.dispose();
+    _modeloController.dispose();
+    _placaController.dispose();
+    _anoController.dispose();
+    _corController.dispose();
+    super.dispose();
+  }
+
+  void _cadastrarTudo() {
+    if (_formKey.currentState?.validate() ?? false) {
+      // 1. Monta o mapa de cadastro
+      final dadosCadastro = {
+        'nome': _nomeController.text,
+        'cpf': _cpfController.text,
+        'telefone': _telefoneController.text,
+        'email': _emailController.text,
+        'placa': _placaController.text,
+        'modelo': _modeloController.text,
+        'ano': _anoController.text,
+        'cor': _corController.text,
+      };
+
+      // 2. Monta o model da OS (vazia por enquanto, a lógica da página principal preenche o serviço)
+      final novaOrdem = OrdemDeServicoModel(
+        defeito: '', // Será preenchido na tela principal
+        valorTotal: 0.0,
+        status: StatusOrdemDeServico.EM_ANDAMENTO,
+      );
+
+      // 3. Dispara o evento
+      context.read<AdicionarOrdemDeServicoBloc>().add(
+        CriarOSComNovoClienteEvent(dadosCadastro, novaOrdem),
+      );
+
+      Navigator.pop(context, true); // Retorna true para avisar que cadastrou
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Fundo do modal igual ao print da Vercel (escuro, bordas arredondadas)
     return Container(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      decoration: const BoxDecoration(
-        color: ColorsApp.preto,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: const Color(0xFF09090B), // Zinc 950 - Padrão escuro Vercel
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.1)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildHeader(),
+          const Divider(height: 1, color: Colors.white10),
+
+          // Corpo rolável do formulário
           Flexible(
-            child: CardTabAnimated(
-              key: _cardTabKey,
-              steps: [
-                CardTabStep(
-                  title: '1. Cliente',
-                  content: SingleChildScrollView(child: _stepCliente()),
-                  isStepValid: () => _formCliente.currentState?.validate() ?? false,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionTitle('DADOS PESSOAIS'),
+                    _buildField(_nomeController, 'Nome Completo', placeholder: 'Ex: José da Silva'),
+                    Row(
+                      children: [
+                        Expanded(child: _buildField(_cpfController, 'CPF', placeholder: '000.000.000-00', keyboard: TextInputType.number)),
+                        const SizedBox(width: 16),
+                        Expanded(child: _buildField(_telefoneController, 'Telefone', placeholder: '(00) 00000-0000', keyboard: TextInputType.phone)),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Expanded(child: _buildField(_emailController, 'E-mail', placeholder: 'email@exemplo.com', keyboard: TextInputType.emailAddress)),
+                        const SizedBox(width: 16),
+                        Expanded(child: const SizedBox()), // Espaço vazio para manter o grid igual ao React
+                      ],
+                    ),
+
+                    const SizedBox(height: 24),
+                    const Divider(height: 1, color: Colors.white10),
+                    const SizedBox(height: 24),
+
+                    _buildSectionTitle('VEÍCULO'),
+                    Row(
+                      children: [
+                        Expanded(child: _buildField(_modeloController, 'Modelo', placeholder: 'Ex: Honda Civic')),
+                        const SizedBox(width: 16),
+                        Expanded(child: _buildField(_placaController, 'Placa', placeholder: 'ABC-1D23')),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Expanded(child: _buildField(_anoController, 'Ano', placeholder: '2024', keyboard: TextInputType.number)),
+                        const SizedBox(width: 16),
+                        Expanded(child: _buildField(_corController, 'Cor', placeholder: 'Ex: Prata')),
+                      ],
+                    ),
+                  ],
                 ),
-                CardTabStep(
-                  title: '2. Veículo',
-                  content: SingleChildScrollView(child: _stepVeiculo()),
-                  isStepValid: () => _formCarro.currentState?.validate() ?? false,
-                ),
-                CardTabStep(
-                  title: '3. Serviço',
-                  content: SingleChildScrollView(child: _stepServico()),
-                  isStepValid: () => _formServico.currentState?.validate() ?? false,
-                ),
-              ],
+              ),
             ),
           ),
-          const SizedBox(height: 10),
+
+          const Divider(height: 1, color: Colors.white10),
+          _buildFooter(),
         ],
       ),
     );
   }
 
-  Widget _stepCliente() {
-    return Form(
-      key: _formCliente,
-      child: Column(
-        children: [
-          const Text(
-            'CADASTRO DE NOVO CLIENTE',
-            style: TextStyle(color: ColorsApp.azulClaro, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 15),
-          _buildField(_nomeController, 'Nome Completo', Icons.person),
-          _buildField(_cpfController, 'CPF', Icons.badge),
-          const SizedBox(height: 15),
-          _buildNextButton('PRÓXIMO: VEÍCULO', 0),
-        ],
-      ),
-    );
-  }
-
-  Widget _stepVeiculo() {
-    return Form(
-      key: _formCarro,
-      child: Column(
-        children: [
-          const Text(
-            'DADOS DO VEÍCULO',
-            style: TextStyle(color: ColorsApp.azulClaro, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 15),
-          _buildField(_placaController, 'Placa', Icons.pin),
-          _buildField(_modeloController, 'Modelo/Versão', Icons.directions_car),
-          const SizedBox(height: 15),
-          _buildNextButton('PRÓXIMO: PROBLEMA', 1),
-        ],
-      ),
-    );
-  }
-
-  Widget _stepServico() {
-    return Form(
-      key: _formServico,
-      child: Column(
-        children: [
-          const Text(
-            'DETALHES DA ORDEM',
-            style: TextStyle(color: ColorsApp.azulClaro, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 15),
-          _buildField(_defeitoController, 'O que o cliente relatou?', Icons.build, maxLines: 2),
-          _buildField(
-            _valorController,
-            'Valor Estimado',
-            Icons.attach_money,
-            keyboard: TextInputType.number,
-          ),
-          const SizedBox(height: 15),
-          _buildFinalizeButton(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFinalizeButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 50,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(backgroundColor: ColorsApp.branco),
-        onPressed: () {
-          if (_formServico.currentState!.validate()) {
-            // 1. Monta o mapa de cadastro
-            final dadosCadastro = {
-              'nome': _nomeController.text,
-              'placa': _placaController.text,
-              'modelo': _modeloController.text,
-            };
-
-            // 2. Monta o model da OS
-            final novaOrdem = OrdemDeServicoModel(
-              defeito: _defeitoController.text,
-              valorTotal: double.tryParse(_valorController.text) ?? 0.0,
-              status: StatusOrdemDeServico.EM_ANDAMENTO,
-            );
-
-            // 3. Dispara o evento específico para Cliente Novo
-            context.read<AdicionarOrdemDeServicoBloc>().add(
-              CriarOSComNovoClienteEvent(dadosCadastro, novaOrdem),
-            );
-
-            Navigator.pop(context);
-          }
-        },
-        child: const Text(
-          'CADASTRAR TUDO',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
-  }
-
-  // Helper para os campos de texto
-  Widget _buildField(
-    TextEditingController controller,
-    String label,
-    IconData icon, {
-    int maxLines = 1,
-    TextInputType keyboard = TextInputType.text,
-  }) {
+  Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: TextFormField(
-        controller: controller,
-        maxLines: maxLines,
-        keyboardType: keyboard,
-        style: const TextStyle(color: Colors.white),
-        decoration: InputDecoration(
-          labelText: label,
-          prefixIcon: Icon(icon, color: ColorsApp.branco),
-          labelStyle: const TextStyle(color: Colors.white60),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.person_add_alt_1, color: Color(0xFF10B981), size: 20), // Ícone verde
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'Cadastrar Novo Cliente',
+                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Preencha os dados do cliente e do veículo para continuar.',
+                    style: TextStyle(color: Colors.white54, fontSize: 12),
+                  ),
+                ],
+              ),
+            ],
           ),
-          focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: ColorsApp.branco)),
-        ),
-        validator: (v) => v!.isEmpty ? 'Obrigatório' : null,
+          IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.close, color: Colors.white54, size: 20),
+            splashRadius: 20,
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildNextButton(String text, int step) => SizedBox(
-    width: double.infinity,
-    height: 40,
-    child: ElevatedButton(
-      style: ElevatedButton.styleFrom(backgroundColor: ColorsApp.branco),
-      onPressed: () => _cardTabKey.currentState?.goToStep(step + 1),
-      child: Text(text, style: const TextStyle(color: Colors.black)),
-    ),
-  );
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Text(
+        title,
+        style: const TextStyle(
+            color: Colors.white54,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1.2
+        ),
+      ),
+    );
+  }
 
-  Widget _buildHeader() => Padding(
-    padding: const EdgeInsets.all(16),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Text(
-          'NOVO CLIENTE & VEÍCULO',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.close, color: Colors.white),
-        ),
-      ],
-    ),
-  );
+  Widget _buildField(
+      TextEditingController controller,
+      String label, {
+        String? placeholder,
+        TextInputType keyboard = TextInputType.text,
+      }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 6),
+          TextFormField(
+            controller: controller,
+            keyboardType: keyboard,
+            style: const TextStyle(color: Colors.white, fontSize: 14),
+            decoration: InputDecoration(
+              hintText: placeholder,
+              hintStyle: const TextStyle(color: Colors.white24),
+              filled: true,
+              fillColor: const Color(0xFF18181B), // Zinc 900
+              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Color(0xFF10B981), width: 1.5), // Borda verde no focus
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.redAccent),
+              ),
+            ),
+            validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFooter() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(color: Colors.white.withOpacity(0.1)),
+              ),
+            ),
+            child: const Text('Cancelar', style: TextStyle(fontWeight: FontWeight.w500)),
+          ),
+          const SizedBox(width: 12),
+          ElevatedButton.icon(
+            onPressed: _cadastrarTudo,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF10B981), // Verde Vercel
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            icon: const Icon(Icons.person_add, size: 18),
+            label: const Text('Cadastrar e Selecionar', style: TextStyle(fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+  }
 }

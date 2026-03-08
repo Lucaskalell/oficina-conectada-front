@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../dash_board/dash_board_page.dart';
 import '../estoque/estoque_page.dart';
+import '../ordem_de_servico/ordem_de_servico_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,12 +18,25 @@ class _HomePageState extends State<HomePage> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  // Cores Padrão Vercel
+  final Color _bgDark = const Color(0xFF09090B); //  (Fundo Geral)
+  final Color _sidebarDark = const Color(0xFF000000); // Preto absoluto ou 09090B
+  final Color _cardDark = const Color(0xFF18181B); // (Itens selecionados)
+  final Color _primaryColor = const Color(0xFF10B981); // Verde Esmeralda
+  final Color _textForeground = const Color(0xFFFAFAFA); // Branco
+  final Color _textMuted = const Color(0xFFA1A1AA); // Cinza texto
+
+  // Expandimos a lista de futuras melhorias que vou colocar
   final List<Widget> _screens = [
-    const DashBoardPage(),
-    const Center(child: Text('Página: Clientes', style: TextStyle(fontSize: 24, color: Colors.grey))), // 1
-    const EstoquePage(),
-    const Center(child: Text('Página: Chat', style: TextStyle(fontSize: 24, color: Colors.grey))),     // 3
-    const Center(child: Text('Página: Configuração', style: TextStyle(fontSize: 24, color: Colors.grey))), // 4
+    const DashBoardPage(), // 0
+    const OrdemServicoPage(), // 1 (Substitua pela sua OrdemServicoPage)
+    const Center(child: Text('Página: Clientes', style: TextStyle(fontSize: 24, color: Colors.grey))), // 2
+    const Center(child: Text('Página: Veículos', style: TextStyle(fontSize: 24, color: Colors.grey))), // 3
+    const EstoquePage(), // 4
+    const Center(child: Text('Página: Financeiro', style: TextStyle(fontSize: 24, color: Colors.grey))), // 5
+    const Center(child: Text('Página: Agenda', style: TextStyle(fontSize: 24, color: Colors.grey))), // 6
+    const Center(child: Text('Página: Chat', style: TextStyle(fontSize: 24, color: Colors.grey))), // 7
+    const Center(child: Text('Página: Configuração', style: TextStyle(fontSize: 24, color: Colors.grey))), // 8
   ];
 
   void _onScreenSelected(int index, String titulo) {
@@ -53,19 +67,62 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  AppBar _buildAppBar() {
+    return AppBar(
+      title: Text(_currentTitle, style: TextStyle(color: _textForeground, fontSize: 18, fontWeight: FontWeight.w600)),
+      backgroundColor: _bgDark,
+      elevation: 0,
+      iconTheme: IconThemeData(color: _textMuted),
+      shape: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.05), width: 1)),
+      actions: [
+        IconButton(
+          icon: Icon(Icons.notifications_none_outlined, color: _textMuted),
+          tooltip: 'Notificações',
+          splashRadius: 20,
+          onPressed: () {},
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+          child: ElevatedButton.icon(
+            icon: const Icon(Icons.add, size: 16),
+            label: const Text('Nova OS', style: TextStyle(fontWeight: FontWeight.w600)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _primaryColor,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+            ),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/ordemDeServico');
+            },
+          ),
+        ),
+        const SizedBox(width: 8),
+        _buildProfileAvatar(),
+        const SizedBox(width: 16),
+      ],
+    );
+  }
+
   Widget _buildProfileAvatar() {
     return PopupMenuButton<String>(
       onSelected: (value) {
         if (value == 'sair') _handleLogout();
       },
-      tooltip: 'Opções',
+      tooltip: 'Opções da Conta',
+      color: _cardDark,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide(color: Colors.white.withOpacity(0.1))),
       child: CircleAvatar(
-        radius: 18,
+        radius: 16,
         backgroundImage: const AssetImage('assets/images/tomioka.png'),
-        backgroundColor: Colors.grey.shade700,
+        backgroundColor: _cardDark,
       ),
       itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-        const PopupMenuItem<String>(value: 'perfil', child: Text('Ver Perfil')),
+        const PopupMenuItem<String>(
+          value: 'perfil',
+          child: Text('Ver Perfil', style: TextStyle(color: Colors.white)),
+        ),
         const PopupMenuItem<String>(
           value: 'sair',
           child: Text('Sair', style: TextStyle(color: Colors.redAccent)),
@@ -74,112 +131,91 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  AppBar _buildAppBar() {
-    return AppBar(
-      title: Text(_currentTitle),
-      backgroundColor: Colors.grey.shade900,
-      elevation: 1,
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.notifications_none_outlined),
-          tooltip: 'Notificações',
-          onPressed: () {},
-        ),
-        ElevatedButton.icon(
-          icon: const Icon(Icons.add, size: 18),
-          label: const Text('Nova Ordem de Serviço'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.black,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          ),
-          onPressed: () {
-            Navigator.of(context).pushNamed('/ordemDeServico');
-          },
-        ),
-        const SizedBox(width: 16),
-        _buildProfileAvatar(),
-        const SizedBox(width: 16),
-      ],
-    );
-  }
-
   Widget _buildDrawer() {
     return Container(
-      width: 250,
-      color: const Color(0xff252526),
+      width: 260,
+      color: _sidebarDark,
       child: Column(
         children: [
+          // Header do Menu (Logo + Nome do Sistema)
           InkWell(
             onTap: _resetToHome,
-            child: UserAccountsDrawerHeader(
-              accountName: const Text(
-                'Oficina do Tomioka',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: _primaryColor.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.build, color: _primaryColor, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Oficina Conectada', style: TextStyle(color: _textForeground, fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text('Sistema de Gerenciamento', style: TextStyle(color: _textMuted, fontSize: 12)),
+                    ],
+                  )
+                ],
               ),
-              accountEmail: const Text('lucas@email.com'),
-              currentAccountPicture: CircleAvatar(
-                backgroundImage: const AssetImage('assets/images/tomioka.png'),
-                backgroundColor: Colors.grey.shade300,
-              ),
-              decoration: BoxDecoration(color: Colors.grey.shade800),
             ),
           ),
-          const SizedBox(height: 10),
 
+          Divider(color: Colors.white.withOpacity(0.05), height: 1),
+
+          // Menu de Navegação
           Expanded(
             child: ListView(
-              padding: EdgeInsets.zero,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
               children: [
-                // Dashboard
-                ListTile(
-                  leading: Icon(Icons.dashboard_outlined, color: _selectedIndex == 0 ? Colors.white : Colors.grey.shade400),
-                  title: Text('Dashboard', style: TextStyle(color: _selectedIndex == 0 ? Colors.white : Colors.grey.shade300)),
-                  tileColor: _selectedIndex == 0 ? Colors.blueAccent.withOpacity(0.2) : null,
-                  onTap: () => _onScreenSelected(0, 'Dashboard'),
-                ),
-                // Clientes
-                ListTile(
-                  leading: Icon(Icons.people_outline, color: _selectedIndex == 1 ? Colors.white : Colors.grey.shade400),
-                  title: Text('Clientes', style: TextStyle(color: _selectedIndex == 1 ? Colors.white : Colors.grey.shade300)),
-                  tileColor: _selectedIndex == 1 ? Colors.blueAccent.withOpacity(0.2) : null,
-                  onTap: () => _onScreenSelected(1, 'Clientes'),
-                ),
-                // Estoque
-                ListTile(
-                  leading: Icon(Icons.inventory_2_outlined, color: _selectedIndex == 2 ? Colors.white : Colors.grey.shade400),
-                  title: Text('Estoque', style: TextStyle(color: _selectedIndex == 2 ? Colors.white : Colors.grey.shade300)),
-                  tileColor: _selectedIndex == 2 ? Colors.blueAccent.withOpacity(0.2) : null,
-                  onTap: () => _onScreenSelected(2, 'Estoque'),
-                ),
-                // Chat
-                ListTile(
-                  leading: Icon(Icons.chat_bubble_outline, color: _selectedIndex == 3 ? Colors.white : Colors.grey.shade400),
-                  title: Text('Chat', style: TextStyle(color: _selectedIndex == 3 ? Colors.white : Colors.grey.shade300)),
-                  tileColor: _selectedIndex == 3 ? Colors.blueAccent.withOpacity(0.2) : null,
-                  onTap: () => _onScreenSelected(3, 'Chat'),
-                ),
+                _buildSectionTitle('PRINCIPAL'),
+                _buildNavItem(0, 'Dashboard', Icons.grid_view_rounded),
+                _buildNavItem(1, 'Ordens de Serviço', Icons.assignment_outlined, badge: 12),
+                _buildNavItem(2, 'Clientes', Icons.people_outline),
+                _buildNavItem(3, 'Veículos', Icons.directions_car_outlined),
+                _buildNavItem(4, 'Estoque', Icons.inventory_2_outlined, badge: 3),
+                _buildNavItem(5, 'Financeiro', Icons.attach_money_outlined),
+                _buildNavItem(6, 'Agenda', Icons.calendar_today_outlined),
+                _buildNavItem(7, 'Chat', Icons.chat_bubble_outline),
 
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Divider(thickness: 0.5, color: Colors.grey),
-                ),
-
-                // Configuração
-                ListTile(
-                  leading: Icon(Icons.settings_outlined, color: _selectedIndex == 4 ? Colors.white : Colors.grey.shade400),
-                  title: Text('Configuração', style: TextStyle(color: _selectedIndex == 4 ? Colors.white : Colors.grey.shade300)),
-                  tileColor: _selectedIndex == 4 ? Colors.blueAccent.withOpacity(0.2) : null,
-                  onTap: () => _onScreenSelected(4, 'Configuração'),
-                ),
+                const SizedBox(height: 16),
+                _buildSectionTitle('SISTEMA'),
+                _buildNavItem(8, 'Configurações', Icons.settings_outlined),
               ],
             ),
           ),
-          SafeArea(
-            child: ListTile(
-              leading: const Icon(Icons.logout, color: Colors.redAccent),
-              title: const Text('Sair', style: TextStyle(color: Colors.redAccent, fontSize: 16)),
-              onTap: _handleLogout,
+
+          // Perfil do Usuário
+          Divider(color: Colors.white.withOpacity(0.05), height: 1),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 18,
+                  backgroundImage: const AssetImage('assets/images/tomioka.png'),
+                  backgroundColor: _cardDark,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Kalell', style: TextStyle(color: _textForeground, fontSize: 14, fontWeight: FontWeight.w500)),
+                      Text('lucas@email.com', style: TextStyle(color: _textMuted, fontSize: 12), overflow: TextOverflow.ellipsis),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.logout, color: Colors.redAccent, size: 20),
+                  onPressed: _handleLogout,
+                  splashRadius: 20,
+                )
+              ],
             ),
           ),
         ],
@@ -187,9 +223,47 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // auxiliares para o Menu
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 16, 12, 8),
+      child: Text(
+        title,
+        style: TextStyle(color: _textMuted.withOpacity(0.5), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index, String title, IconData icon, {int? badge}) {
+    final bool isSelected = _selectedIndex == index;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: ListTile(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        dense: true,
+        leading: Icon(icon, color: isSelected ? _textForeground : _textMuted, size: 20),
+        title: Text(
+            title,
+            style: TextStyle(color: isSelected ? _textForeground : _textMuted, fontSize: 14, fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal)
+        ),
+        tileColor: isSelected ? _cardDark : Colors.transparent,
+        hoverColor: _cardDark.withOpacity(0.5),
+        trailing: badge != null
+            ? Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          decoration: BoxDecoration(color: _primaryColor.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
+          child: Text(badge.toString(), style: TextStyle(color: _primaryColor, fontSize: 11, fontWeight: FontWeight.bold)),
+        )
+            : null,
+        onTap: () => _onScreenSelected(index, title),
+      ),
+    );
+  }
+
   Widget _buildBody() {
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 300),
       child: _selectedIndex == -1
           ? Container(
         key: const ValueKey('HomeImage'),
@@ -204,20 +278,20 @@ class _HomePageState extends State<HomePage> {
             gradient: LinearGradient(
               begin: Alignment.bottomCenter,
               end: Alignment.topCenter,
-              colors: [Colors.black.withOpacity(0.8), Colors.transparent],
+              colors: [Colors.black.withOpacity(0.9), Colors.transparent],
             ),
           ),
           alignment: Alignment.bottomLeft,
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(40),
           child: const Text(
             'Bem-vindo, Kalell',
-            style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+            style: TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.bold),
           ),
         ),
       )
           : Container(
         key: ValueKey('Content_$_selectedIndex'),
-        color: const Color(0xFF121212),
+        color: _bgDark,
         child: _screens[_selectedIndex],
       ),
     );
@@ -228,15 +302,15 @@ class _HomePageState extends State<HomePage> {
     final bool isMobile = MediaQuery.of(context).size.width < 800;
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: _bgDark,
       appBar: _buildAppBar(),
-      drawer: isMobile ? Drawer(child: _buildDrawer()) : null,
+      drawer: isMobile ? Drawer(backgroundColor: _sidebarDark, child: _buildDrawer()) : null,
       body: isMobile
           ? _buildBody()
           : Row(
         children: [
           _buildDrawer(),
-          const VerticalDivider(thickness: 1, width: 1, color: Colors.black),
+          VerticalDivider(thickness: 1, width: 1, color: Colors.white.withOpacity(0.05)),
           Expanded(child: _buildBody()),
         ],
       ),

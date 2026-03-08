@@ -1,4 +1,3 @@
-
 import 'carro_model.dart';
 
 class ClienteModel {
@@ -7,16 +6,9 @@ class ClienteModel {
   final String? cpf;
   final String? email;
   final String? telefone;
-  final List<CarroModel>? carros; // NOVO: Lista de carros vinculada
+  final List<CarroModel>? carros;
 
-  ClienteModel({
-    this.id,
-    required this.nome,
-    this.cpf,
-    this.email,
-    this.telefone,
-    this.carros,
-  });
+  ClienteModel({this.id, required this.nome, this.cpf, this.email, this.telefone, this.carros});
 
   factory ClienteModel.fromJson(Map<String, dynamic> json) {
     return ClienteModel(
@@ -25,9 +17,19 @@ class ClienteModel {
       cpf: json['cpf'],
       email: json['email'],
       telefone: json['telefone'],
-      carros: json['carros'] != null 
+      carros: json['carros'] != null
           ? (json['carros'] as List).map((i) => CarroModel.fromJson(i)).toList()
           : null,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      if (id != null) 'id': id,
+      'nome': nome,
+      'cpf': cpf,
+      'email': email,
+      'telefone': telefone,
+    };
   }
 }

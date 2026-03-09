@@ -3,7 +3,6 @@ import 'dash_board_event.dart';
 import 'dash_board_repository.dart';
 import 'dash_board_state.dart';
 
-
 class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final DashBoardRepository repository;
 
@@ -11,10 +10,10 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     on<CarregarDashboard>((event, emit) async {
       emit(DashboardLoading());
       try {
-        final data = await repository.getDashboardData();
-        emit(DashboardLoaded(data));
+        final dashboardData = await repository.getDashboardData();
+        emit(DashboardLoaded(dashboardData));
       } catch (e) {
-        emit(DashboardError(e.toString()));
+        emit(DashboardError('Erro ao carregar dashboard: $e'));
       }
     });
   }

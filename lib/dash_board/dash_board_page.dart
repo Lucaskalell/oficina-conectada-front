@@ -1,47 +1,79 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import '../colors/colors.dart';
+import '../model/model_dash_board/dash_board_model.dart';
+import 'dash_board_bloc.dart';
+import 'dash_board_event.dart';
+import 'dash_board_repository.dart';
+import 'dash_board_state.dart';
 
-
-//COMO ESTOU MUDANOD FRONT  DO WEB INTEIRO ALGUNS DADOS  ESTAO MOCK
-//DEVIDO QUE  ALGUMAS ROTAS NAO ESTÃO FEITAS NO BACK (PRODUTO AINDA ESTÁ SENDO DESENVOLVIDO)
-
-
-
-// Cores
-const Color _bgDark = Color(0xFF09090B);
-const Color _cardDark = Color(0xFF18181B);
-const Color _border = Color(0xFF27272A);
-const Color _textForeground = Color(0xFFFAFAFA);
-const Color _textMuted = Color(0xFFA1A1AA);
-
-// Cores dos Gráficos e Badges
-const Color _green = Color(0xFF4ADE80);
-const Color _blue = Color(0xFF60A5FA);
-const Color _emerald = Color(0xFF34D399);
-const Color _warning = Color(0xFFF59E0B);
-const Color _destructive = Color(0xFFEF4444);
-
-class DashBoardPage extends StatelessWidget {
+class DashBoardPage extends StatefulWidget {
   const DashBoardPage({super.key});
+
+  @override
+  State<DashBoardPage> createState() => _DashBoardPageState();
+}
+
+class _DashBoardPageState extends State<DashBoardPage> {
+  late DashboardBloc _bloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _bloc = DashboardBloc(DashBoardRepository());
+    _bloc.add(CarregarDashboard());
+  }
+
+  Color _corPorStatus(String status) {
+    if (status == 'FINALIZADO') return ColorsApp.emeraldNew;
+    if (status.contains('AGUARDANDO')) return ColorsApp.warningNew;
+    if (status == 'EM_ANDAMENTO') return ColorsApp.blueNew;
+    return ColorsApp.textMuted;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bgDark,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(),
-            const SizedBox(height: 24),
-            _buildStatsCards(),
-            const SizedBox(height: 24),
-            _buildChartsRow(),
-            const SizedBox(height: 24),
-            _buildBottomGrid(),
-          ],
-        ),
+      backgroundColor: ColorsApp.bgDark,
+      body: BlocBuilder<DashboardBloc, DashboardState>(
+        bloc: _bloc,
+        builder: (context, state) {
+          if (state is DashboardLoading || state is DashboardInitial) {
+            return const Center(child: CircularProgressIndicator(color: ColorsApp.greenNew));
+          }
+
+          if (state is DashboardError) {
+            return Center(
+              child: Text(
+                state.mensagem,
+                style: const TextStyle(color: ColorsApp.vermelhoToast, fontSize: 16),
+              ),
+            );
+          }
+
+          if (state is DashboardLoaded) {
+            final dados = state.dados;
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(),
+                  const SizedBox(height: 24),
+                  _buildStatsCards(dados),
+                  const SizedBox(height: 24),
+                  _buildChartsRow(dados),
+                  const SizedBox(height: 24),
+                  _buildBottomGrid(dados),
+                ],
+              ),
+            );
+          }
+
+          return const SizedBox.shrink();
+        },
       ),
     );
   }
@@ -52,39 +84,48 @@ class DashBoardPage extends StatelessWidget {
       children: const [
         Text(
           'Dashboard',
-          style: TextStyle(color: _textForeground, fontSize: 24, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: ColorsApp.textForeground,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         SizedBox(height: 4),
-        Text('Visão geral da sua oficina', style: TextStyle(color: _textMuted, fontSize: 14)),
+        Text(
+          'Visão geral da sua oficina',
+          style: TextStyle(color: ColorsApp.textMuted, fontSize: 14),
+        ),
       ],
     );
   }
 
-  Widget _buildStatsCards() {
+  Widget _buildStatsCards(DashboardModel dados) {
+    String faturamento = 'R\$ ${dados.faturamentoMensal.toStringAsFixed(2).replaceAll('.', ',')}';
+
     return Row(
       children: [
         _buildSingleStatCard(
           title: 'Faturamento Mensal',
-          value: 'R\$ 48.750',
-          change: '+12,5%',
-          desc: 'vs. mês anterior',
+          value: faturamento,
+          change: 'Atual',
+          desc: 'neste mês',
           isUp: true,
           icon: Icons.attach_money,
         ),
         const SizedBox(width: 16),
         _buildSingleStatCard(
           title: 'OS Abertas',
-          value: '12',
-          change: '+3',
-          desc: 'esta semana',
+          value: dados.osAbertas.toString(),
+          change: 'Total',
+          desc: 'no momento',
           isUp: true,
           icon: Icons.content_paste,
         ),
         const SizedBox(width: 16),
         _buildSingleStatCard(
           title: 'OS Concluídas',
-          value: '34',
-          change: '+8',
+          value: dados.osConcluidas.toString(),
+          change: 'Atual',
           desc: 'este mês',
           isUp: true,
           icon: Icons.check_circle_outline,
@@ -92,8 +133,8 @@ class DashBoardPage extends StatelessWidget {
         const SizedBox(width: 16),
         _buildSingleStatCard(
           title: 'Veículos em Serviço',
-          value: '7',
-          change: '-2',
+          value: dados.veiculosEmServico.toString(),
+          change: 'Pátio',
           desc: 'neste momento',
           isUp: false,
           icon: Icons.directions_car_outlined,
@@ -114,9 +155,9 @@ class DashBoardPage extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: _cardDark,
+          color: ColorsApp.cardDark,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: _border),
+          border: Border.all(color: ColorsApp.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,15 +168,18 @@ class DashBoardPage extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                    color: _textMuted,
+                    color: ColorsApp.textMuted,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 Container(
                   padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(color: _bgDark, borderRadius: BorderRadius.circular(6)),
-                  child: Icon(icon, color: _textForeground, size: 16),
+                  decoration: BoxDecoration(
+                    color: ColorsApp.bgDark,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Icon(icon, color: ColorsApp.textForeground, size: 16),
                 ),
               ],
             ),
@@ -143,7 +187,7 @@ class DashBoardPage extends StatelessWidget {
             Text(
               value,
               style: const TextStyle(
-                color: _textForeground,
+                color: ColorsApp.textForeground,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
@@ -153,20 +197,20 @@ class DashBoardPage extends StatelessWidget {
               children: [
                 Icon(
                   isUp ? Icons.trending_up : Icons.trending_down,
-                  color: isUp ? _green : _warning,
+                  color: isUp ? ColorsApp.greenNew : ColorsApp.warningNew,
                   size: 14,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   change,
                   style: TextStyle(
-                    color: isUp ? _green : _warning,
+                    color: isUp ? ColorsApp.greenNew : ColorsApp.warningNew,
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(width: 4),
-                Text(desc, style: const TextStyle(color: _textMuted, fontSize: 12)),
+                Text(desc, style: const TextStyle(color: ColorsApp.textMuted, fontSize: 12)),
               ],
             ),
           ],
@@ -175,81 +219,79 @@ class DashBoardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildChartsRow() {
+  Widget _buildChartsRow(DashboardModel dados) {
     return SizedBox(
       height: 350,
       child: Row(
         children: [
-          Expanded(child: _buildRevenueChart()),
+          Expanded(child: _buildRevenueChart(dados.graficoFaturamento)),
           const SizedBox(width: 24),
-          Expanded(child: _buildServicesChart()),
+          Expanded(child: _buildServicesChart(dados.graficoServicos)),
         ],
       ),
     );
   }
 
-  Widget _buildRevenueChart() {
-    final List<Map<String, dynamic>> revenueData = [
-      {'month': 'Set', 'receita': 32400, 'despesa': 18200},
-      {'month': 'Out', 'receita': 38100, 'despesa': 20100},
-      {'month': 'Nov', 'receita': 41300, 'despesa': 19800},
-      {'month': 'Dez', 'receita': 35600, 'despesa': 22400},
-      {'month': 'Jan', 'receita': 43200, 'despesa': 21000},
-      {'month': 'Fev', 'receita': 48750, 'despesa': 23500},
-    ];
-
+  Widget _buildRevenueChart(List<FaturamentoMensalModel> revenueData) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _cardDark,
+        color: ColorsApp.cardDark,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _border),
+        border: Border.all(color: ColorsApp.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
             'Faturamento vs Despesas',
-            style: TextStyle(color: _textForeground, fontSize: 16, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: ColorsApp.textForeground,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-          const Text('Últimos 6 meses (R\$)', style: TextStyle(color: _textMuted, fontSize: 13)),
+          const Text(
+            'Últimos 6 meses (R\$)',
+            style: TextStyle(color: ColorsApp.textMuted, fontSize: 13),
+          ),
           const SizedBox(height: 16),
           Expanded(
             child: SfCartesianChart(
               plotAreaBorderWidth: 0,
               margin: EdgeInsets.zero,
               primaryXAxis: CategoryAxis(
-                labelStyle: const TextStyle(color: _textMuted, fontSize: 12),
+                labelStyle: const TextStyle(color: ColorsApp.textMuted, fontSize: 12),
                 majorGridLines: const MajorGridLines(width: 0),
                 axisLine: const AxisLine(width: 0),
               ),
               primaryYAxis: NumericAxis(
-                labelStyle: const TextStyle(color: _textMuted, fontSize: 12),
+                labelStyle: const TextStyle(color: ColorsApp.textMuted, fontSize: 12),
                 labelFormat: '{value}k',
                 majorTickLines: const MajorTickLines(size: 0),
                 axisLine: const AxisLine(width: 0),
                 majorGridLines: MajorGridLines(
                   width: 1,
-                  color: _textMuted.withOpacity(0.1),
+                  color: ColorsApp.textMuted.withOpacity(0.1),
                   dashArray: const [5, 5],
                 ),
               ),
-              tooltipBehavior: TooltipBehavior(enable: true, color: _bgDark),
-              series: <CartesianSeries<Map<String, dynamic>, String>>[
-                ColumnSeries<Map<String, dynamic>, String>(
+              tooltipBehavior: TooltipBehavior(enable: true, color: ColorsApp.bgDark),
+              series: <CartesianSeries<FaturamentoMensalModel, String>>[
+                ColumnSeries<FaturamentoMensalModel, String>(
                   dataSource: revenueData,
-                  xValueMapper: (data, _) => data['month'] as String,
-                  yValueMapper: (data, _) => (data['receita'] as int) / 1000,
+                  xValueMapper: (data, _) => data.mes,
+                  yValueMapper: (data, _) => data.receita / 1000,
                   name: 'Receita',
-                  color: _green,
+                  color: ColorsApp.greenNew,
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
                 ),
-                ColumnSeries<Map<String, dynamic>, String>(
+                ColumnSeries<FaturamentoMensalModel, String>(
                   dataSource: revenueData,
-                  xValueMapper: (data, _) => data['month'] as String,
-                  yValueMapper: (data, _) => (data['despesa'] as int) / 1000,
+                  xValueMapper: (data, _) => data.mes,
+                  yValueMapper: (data, _) => data.despesa / 1000,
                   name: 'Despesa',
-                  color: _blue,
+                  color: ColorsApp.blueNew,
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
                 ),
               ],
@@ -260,33 +302,28 @@ class DashBoardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildServicesChart() {
-    final List<Map<String, dynamic>> servicesData = [
-      {'month': 'Set', 'os': 28},
-      {'month': 'Out', 'os': 35},
-      {'month': 'Nov', 'os': 42},
-      {'month': 'Dez', 'os': 31},
-      {'month': 'Jan', 'os': 38},
-      {'month': 'Fev', 'os': 46},
-    ];
-
+  Widget _buildServicesChart(List<ServicosMensalModel> servicesData) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _cardDark,
+        color: ColorsApp.cardDark,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _border),
+        border: Border.all(color: ColorsApp.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
             'Ordens de Serviço',
-            style: TextStyle(color: _textForeground, fontSize: 16, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: ColorsApp.textForeground,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const Text(
             'Total de OS concluídas por mês',
-            style: TextStyle(color: _textMuted, fontSize: 13),
+            style: TextStyle(color: ColorsApp.textMuted, fontSize: 13),
           ),
           const SizedBox(height: 16),
           Expanded(
@@ -294,31 +331,34 @@ class DashBoardPage extends StatelessWidget {
               plotAreaBorderWidth: 0,
               margin: EdgeInsets.zero,
               primaryXAxis: CategoryAxis(
-                labelStyle: const TextStyle(color: _textMuted, fontSize: 12),
+                labelStyle: const TextStyle(color: ColorsApp.textMuted, fontSize: 12),
                 majorGridLines: const MajorGridLines(width: 0),
                 axisLine: const AxisLine(width: 0),
               ),
               primaryYAxis: NumericAxis(
-                labelStyle: const TextStyle(color: _textMuted, fontSize: 12),
+                labelStyle: const TextStyle(color: ColorsApp.textMuted, fontSize: 12),
                 majorTickLines: const MajorTickLines(size: 0),
                 axisLine: const AxisLine(width: 0),
                 majorGridLines: MajorGridLines(
                   width: 1,
-                  color: _textMuted.withOpacity(0.1),
+                  color: ColorsApp.textMuted.withOpacity(0.1),
                   dashArray: const [5, 5],
                 ),
               ),
-              tooltipBehavior: TooltipBehavior(enable: true, color: _bgDark),
-              series: <CartesianSeries<Map<String, dynamic>, String>>[
-                SplineAreaSeries<Map<String, dynamic>, String>(
+              tooltipBehavior: TooltipBehavior(enable: true, color: ColorsApp.bgDark),
+              series: <CartesianSeries<ServicosMensalModel, String>>[
+                SplineAreaSeries<ServicosMensalModel, String>(
                   dataSource: servicesData,
-                  xValueMapper: (data, _) => data['month'] as String,
-                  yValueMapper: (data, _) => data['os'] as int,
+                  xValueMapper: (data, _) => data.mes,
+                  yValueMapper: (data, _) => data.totalOs,
                   name: 'Ordens',
-                  borderColor: _emerald,
+                  borderColor: ColorsApp.emeraldNew,
                   borderWidth: 2,
                   gradient: LinearGradient(
-                    colors: [_emerald.withOpacity(0.3), _emerald.withOpacity(0.0)],
+                    colors: [
+                      ColorsApp.emeraldNew.withOpacity(0.3),
+                      ColorsApp.emeraldNew.withOpacity(0.0),
+                    ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
@@ -331,71 +371,32 @@ class DashBoardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomGrid() {
+  Widget _buildBottomGrid(DashboardModel dados) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(flex: 2, child: _buildRecentOrders()),
+        Expanded(flex: 2, child: _buildRecentOrders(dados.ordensRecentes)),
         const SizedBox(width: 24),
         Expanded(
           flex: 1,
           child: Column(
-            children: [_buildTodaySchedule(), const SizedBox(height: 24), _buildLowStockAlert()],
+            children: [
+              _buildTodaySchedule(dados.agendamentos), // <-- Agora passamos a lista real!
+              const SizedBox(height: 24),
+              _buildLowStockAlert(dados.estoqueBaixo),
+            ],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildRecentOrders() {
-    final orders = [
-      {
-        'id': 'OS-2026-0147',
-        'service': 'Troca de embreagem',
-        'client': 'Carlos Silva',
-        'car': 'Honda Civic 2022 (BRA-2E19)',
-        'mec': 'Joao',
-        'time': '2h atras',
-        'status': 'Em Andamento',
-        'color': _blue,
-      },
-      {
-        'id': 'OS-2026-0146',
-        'service': 'Revisão completa 60.000km',
-        'client': 'Ana Oliveira',
-        'car': 'Toyota Corolla 2021 (RIO-4A32)',
-        'mec': 'Pedro',
-        'time': '3h atras',
-        'status': 'Aguard. Peça',
-        'color': _warning,
-      },
-      {
-        'id': 'OS-2026-0145',
-        'service': 'Troca de pastilhas de freio',
-        'client': 'Roberto Santos',
-        'car': 'VW Golf 2020 (SAO-7B55)',
-        'mec': 'Lucas',
-        'time': '5h atras',
-        'status': 'Concluída',
-        'color': _emerald,
-      },
-      {
-        'id': 'OS-2026-0144',
-        'service': 'Alinhamento e balanceamento',
-        'client': 'Maria Fernandes',
-        'car': 'Fiat Argo 2023 (MIS-3C88)',
-        'mec': 'Joao',
-        'time': '6h atras',
-        'status': 'Em Andamento',
-        'color': _blue,
-      },
-    ];
-
+  Widget _buildRecentOrders(List<OrdemRecenteModel> orders) {
     return Container(
       decoration: BoxDecoration(
-        color: _cardDark,
+        color: ColorsApp.cardDark,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _border),
+        border: Border.all(color: ColorsApp.border),
       ),
       child: Column(
         children: [
@@ -407,142 +408,134 @@ class DashBoardPage extends StatelessWidget {
                 const Text(
                   'Ordens Recentes',
                   style: TextStyle(
-                    color: _textForeground,
+                    color: ColorsApp.textForeground,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Row(
                   children: const [
-                    Text('Ver todas', style: TextStyle(color: _green, fontSize: 13)),
-                    Icon(Icons.arrow_forward, color: _green, size: 14),
+                    Text('Ver todas', style: TextStyle(color: ColorsApp.greenNew, fontSize: 13)),
+                    Icon(Icons.arrow_forward, color: ColorsApp.greenNew, size: 14),
                   ],
                 ),
               ],
             ),
           ),
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-            itemCount: orders.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
-            itemBuilder: (context, i) {
-              final o = orders[i];
-              return Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: _bgDark.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: _border),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              o['id'] as String,
-                              style: const TextStyle(
-                                color: _green,
-                                fontSize: 12,
-                                fontFamily: 'monospace',
+          if (orders.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Text(
+                'Nenhuma ordem recente encontrada.',
+                style: TextStyle(color: ColorsApp.textMuted),
+              ),
+            )
+          else
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              itemCount: orders.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, i) {
+                final o = orders[i];
+                final color = _corPorStatus(o.status);
+
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: ColorsApp.bgDark.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: ColorsApp.border),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                o.codigoOs,
+                                style: const TextStyle(
+                                  color: ColorsApp.greenNew,
+                                  fontSize: 12,
+                                  fontFamily: 'monospace',
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: (o['color'] as Color).withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(color: (o['color'] as Color).withOpacity(0.3)),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: color.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(color: color.withOpacity(0.3)),
+                                ),
+                                child: Text(
+                                  o.status.replaceAll('_', ' '),
+                                  // tira o underline para ficar mais limpo
+                                  style: TextStyle(color: color, fontSize: 10),
+                                ),
                               ),
-                              child: Text(
-                                o['status'] as String,
-                                style: TextStyle(color: o['color'] as Color, fontSize: 10),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          o['service'] as String,
-                          style: const TextStyle(
-                            color: _textForeground,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
+                            ],
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${o['client']} - ${o['car']}',
-                          style: const TextStyle(color: _textMuted, fontSize: 12),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          'Mec. ${o['mec']}',
-                          style: const TextStyle(color: _textMuted, fontSize: 12),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            const Icon(Icons.access_time, color: _textMuted, size: 12),
-                            const SizedBox(width: 4),
-                            Text(
-                              o['time'] as String,
-                              style: const TextStyle(color: _textMuted, fontSize: 12),
+                          const SizedBox(height: 8),
+                          Text(
+                            o.servico,
+                            style: const TextStyle(
+                              color: ColorsApp.textForeground,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            o.clienteCarro,
+                            style: const TextStyle(color: ColorsApp.textMuted, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          const Text(
+                            'Responsável', // Fixo por enquanto, pois não tem mecânico no DTO ainda
+                            style: TextStyle(color: ColorsApp.textMuted, fontSize: 12),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(Icons.access_time, color: ColorsApp.textMuted, size: 12),
+                              const SizedBox(width: 4),
+                              Text(
+                                o.tempo,
+                                style: const TextStyle(color: ColorsApp.textMuted, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildTodaySchedule() {
-    final schedule = [
-      {
-        'time': '08:00',
-        'service': 'Troca de óleo',
-        'client': 'Fernando Lima - Hyundai HB20',
-        'mec': 'João',
-        'color': _green,
-      },
-      {
-        'time': '09:30',
-        'service': 'Revisão 20.000km',
-        'client': 'Juliana Costa - Renault Kwid',
-        'mec': 'Pedro',
-        'color': _green,
-      },
-      {
-        'time': '11:00',
-        'service': 'Barulho na suspensão',
-        'client': 'Ricardo Alves - Jeep Compass',
-        'mec': 'Lucas',
-        'color': _green,
-      },
-    ];
+  Widget _buildTodaySchedule(List<AgendamentoModel> agenda) {
+    final agora = DateTime.now();
+    final dataHojeStr =
+        "${agora.day.toString().padLeft(2, '0')}/${agora.month.toString().padLeft(2, '0')}/${agora.year}";
 
     return Container(
       decoration: BoxDecoration(
-        color: _cardDark,
+        color: ColorsApp.cardDark,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _border),
+        border: Border.all(color: ColorsApp.border),
       ),
       child: Column(
         children: [
@@ -550,93 +543,99 @@ class DashBoardPage extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Text(
+              children: [
+                const Text(
                   'Agenda de Hoje',
                   style: TextStyle(
-                    color: _textForeground,
+                    color: ColorsApp.textForeground,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                Text('02/03/2026', style: TextStyle(color: _textMuted, fontSize: 12)),
+                Text(dataHojeStr, style: const TextStyle(color: ColorsApp.textMuted, fontSize: 12)),
               ],
             ),
           ),
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-            itemCount: schedule.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
-            itemBuilder: (context, i) {
-              final s = schedule[i];
-              return Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: _bgDark.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: _border),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      s['time'] as String,
-                      style: TextStyle(
-                        color: s['color'] as Color,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+          if (agenda.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Text(
+                'Nenhum agendamento para hoje.',
+                style: TextStyle(color: ColorsApp.textMuted),
+              ),
+            )
+          else
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              itemCount: agenda.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, i) {
+                final s = agenda[i];
+                Color corStatus = ColorsApp.greenNew;
+                if (s.status == 'CANCELADO') corStatus = ColorsApp.vermelhoToast;
+
+                return Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: ColorsApp.bgDark.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: ColorsApp.border),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        s.horario,
+                        style: TextStyle(
+                          color: corStatus,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            s['service'] as String,
-                            style: const TextStyle(
-                              color: _textForeground,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              s.servico,
+                              style: const TextStyle(
+                                color: ColorsApp.textForeground,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            s['client'] as String,
-                            style: const TextStyle(color: _textMuted, fontSize: 12),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Mecânico: ${s['mec']}',
-                            style: const TextStyle(color: _textMuted, fontSize: 12),
-                          ),
-                        ],
+                            const SizedBox(height: 4),
+                            Text(
+                              s.clienteCarro,
+                              style: const TextStyle(color: ColorsApp.textMuted, fontSize: 12),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Mecânico: ${s.mecanico}',
+                              style: const TextStyle(color: ColorsApp.textMuted, fontSize: 12),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+                    ],
+                  ),
+                );
+              },
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildLowStockAlert() {
-    final stock = [
-      {'name': 'Filtro de Óleo - Mann W7008', 'qty': 2, 'min': 10},
-      {'name': 'Pastilha de Freio - TRW Diant.', 'qty': 3, 'min': 8},
-      {'name': 'Correia Dentada - Gates Civic', 'qty': 1, 'min': 5},
-    ];
-
+  Widget _buildLowStockAlert(List<EstoqueBaixoModel> stock) {
     return Container(
       decoration: BoxDecoration(
-        color: _cardDark,
+        color: ColorsApp.cardDark,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _border),
+        border: Border.all(color: ColorsApp.border),
       ),
       child: Column(
         children: [
@@ -647,84 +646,100 @@ class DashBoardPage extends StatelessWidget {
               children: [
                 Row(
                   children: const [
-                    Icon(Icons.warning_amber_rounded, color: _warning, size: 18),
+                    Icon(Icons.warning_amber_rounded, color: ColorsApp.warningNew, size: 18),
                     SizedBox(width: 8),
                     Text(
                       'Estoque Baixo',
                       style: TextStyle(
-                        color: _textForeground,
+                        color: ColorsApp.textForeground,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
                 ),
-                const Text('5 itens', style: TextStyle(color: _warning, fontSize: 12)),
+                Text(
+                  '${stock.length} itens',
+                  style: const TextStyle(color: ColorsApp.warningNew, fontSize: 12),
+                ),
               ],
             ),
           ),
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-            itemCount: stock.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
-            itemBuilder: (context, i) {
-              final item = stock[i];
-              final qty = item['qty'] as int;
-              final min = item['min'] as int;
-              final percent = (qty / min);
+          if (stock.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Text(
+                'Estoque sob controle! Nenhum alerta.',
+                style: TextStyle(color: ColorsApp.greenNew),
+              ),
+            )
+          else
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              itemCount: stock.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, i) {
+                final item = stock[i];
+                final qty = item.quantidadeAtual;
+                final min = item.quantidadeMinima;
 
-              return Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: _bgDark.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: _border),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.inventory_2_outlined, color: _textMuted, size: 16),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item['name'] as String,
-                            style: const TextStyle(color: _textForeground, fontSize: 13),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: LinearProgressIndicator(
-                                  value: percent,
-                                  backgroundColor: _bgDark,
-                                  valueColor: AlwaysStoppedAnimation<Color>(_warning),
-                                  minHeight: 6,
-                                  borderRadius: BorderRadius.circular(3),
+                // evito divisão por zero caso o min venha zerado do banco
+                final percent = min > 0 ? (qty / min) : 0.0;
+
+                return Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: ColorsApp.bgDark.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: ColorsApp.border),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.inventory_2_outlined, color: ColorsApp.textMuted, size: 16),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.nomePeca,
+                              style: const TextStyle(color: ColorsApp.textForeground, fontSize: 13),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: LinearProgressIndicator(
+                                    value: percent.clamp(0.0, 1.0),
+                                    backgroundColor: ColorsApp.bgDark,
+                                    valueColor: const AlwaysStoppedAnimation<Color>(
+                                      ColorsApp.warningNew,
+                                    ),
+                                    minHeight: 6,
+                                    borderRadius: BorderRadius.circular(3),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                '$qty/$min',
-                                style: const TextStyle(
-                                  color: _textMuted,
-                                  fontSize: 11,
-                                  fontFamily: 'monospace',
+                                const SizedBox(width: 12),
+                                Text(
+                                  '$qty/$min',
+                                  style: const TextStyle(
+                                    color: ColorsApp.textMuted,
+                                    fontSize: 11,
+                                    fontFamily: 'monospace',
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+                    ],
+                  ),
+                );
+              },
+            ),
         ],
       ),
     );

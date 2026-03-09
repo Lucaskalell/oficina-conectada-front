@@ -1,7 +1,24 @@
 import 'dart:ui';
 
 class ColorsApp {
-  //Cores  Neutras
+  // CORES DO TEMA PRINCIPAL (verde / preto)
+  static const Color bgDark = Color(0xFF09090B); // Fundo principal
+  static const Color cardDark = Color(0xFF18181B); // Fundo de cards/modais
+  static const Color border = Color(0xFF27272A); // Bordas e divisores
+  static const Color textForeground = Color(0xFFFAFAFA); // Texto principal claro
+  static const Color textMuted = Color(0xFFA1A1AA); // Texto secundario acinzentado
+
+  // CORES DE STATUS (nao e do toast)
+
+  static const Color greenNew = Color(0xFF4ADE80); // Alta/Sucesso
+  static const Color blueNew = Color(0xFF60A5FA); // Em Andamento/Despesa
+  static const Color emeraldNew = Color(0xFF34D399); // Concluído/Primario
+  static const Color warningNew = Color(0xFFF59E0B); // Aguardando/Alerta
+  static const Color destructiveNew = Color(0xFFEF4444); // Erro/Excluir
+
+
+  // CORES NEUTRAS
+
   static const Color preto = Color(0xFF121212);
   static const Color branco = Color(0xFFFFFFFF);
   static const Color cinza = Color(0xFF807F7F);

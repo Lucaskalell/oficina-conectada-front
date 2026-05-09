@@ -2,7 +2,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:oficina_conectada_front/common/constants.dart';
+import 'package:oficina_conectada_front/constants/api_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiClient{

@@ -16,6 +16,7 @@ dependencies:
   http: ^1.2.1
 
   shared_preferences: ^2.2.3
+  flutter_secure_storage: ^9.2.4
   
   flutter_bloc: ^8.1.6
   equatable: ^2.0.5

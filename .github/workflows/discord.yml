@@ -1,2 +1,24 @@
-#jobs:
- # on:
+name: Discord Notification
+
+on:
+  push:
+    branches: [ main, master, develop ]
+
+jobs:
+  discord-notification:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord Notification
+        uses: sarisia/actions-status-discord@v1
+        if: always()
+        with:
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
+          status: ${{ job.status }}
+          title: "🔔 Novo Commit - ${{ github.repository }}"
+          description: |
+            **Branch:** ${{ github.ref_name }}
+            **Autor:** ${{ github.actor }}
+            **Mensagem:** ${{ github.event.head_commit.message }}
+            **Commit:** [${{ github.event.head_commit.id }}](${{ github.event.head_commit.url }})
+          color: 0x00FF00
+          username: GitHub Bot

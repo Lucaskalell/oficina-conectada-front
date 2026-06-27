@@ -10,7 +10,7 @@ class LoginService {
 
   LoginService(this._secureStorage);
 
-  Future<void> realizarLogin(String email, String senha) async {
+  Future<Map<String, dynamic>> realizarLogin(String email, String senha) async {
     final url = Uri.parse('${ApiConstants.baseUrl}/auth/login');
 
     final resposta = await http.post(
@@ -21,9 +21,13 @@ class LoginService {
 
     if (resposta.statusCode == 200) {
       final dados = json.decode(resposta.body);
-      final String token = dados['token'];
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('jwt_token', token);
+      await prefs.setString('jwt_token', dados['token']);
+      await prefs.setString('role', dados['role'] ?? '');
+      return {
+        'primeiroAcesso': dados['primeiroAcesso'] ?? false,
+        'role': dados['role'] ?? '',
+      };
     } else {
       throw Exception('Credenciais inválidas');
     }
@@ -58,6 +62,7 @@ class LoginService {
   Future<void> realizarLogout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('jwt_token');
+    await prefs.remove('role');
     debugPrint('Logout realizado');
   }
 }

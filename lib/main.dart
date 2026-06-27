@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oficina_conectada_front/modules/auth/login/login_page.dart';
+import 'package:oficina_conectada_front/modules/auth/alterar_senha/alterar_senha_page.dart';
+import 'package:oficina_conectada_front/modules/auth/recuperar_senha/recuperar_senha_page.dart';
 import 'package:oficina_conectada_front/views/home/home_view.dart';
 import 'package:oficina_conectada_front/views/carro/carro_view.dart';
 import 'package:oficina_conectada_front/views/cliente/cliente_view.dart';
@@ -25,6 +27,8 @@ class MyApp extends StatelessWidget {
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginPage(),
+        '/alterar-senha': (context) => const AlterarSenhaPage(),
+        '/recuperar-senha': (context) => const RecuperarSenhaPage(),
         '/home': (context) => const HomeView(),
         '/estoque': (context) => const EstoqueView(),
         '/dashboard': (context) => const DashboardView(),

@@ -11,7 +11,15 @@ class LoginInicial extends LoginState {}
 
 class LoginCarregando extends LoginState {}
 
-class LoginSucesso extends LoginState {}
+class LoginSucesso extends LoginState {
+  final bool primeiroAcesso;
+  final String role;
+
+  const LoginSucesso({required this.primeiroAcesso, required this.role});
+
+  @override
+  List<Object?> get props => [primeiroAcesso, role];
+}
 
 class LoginErro extends LoginState {
   final String mensagem;

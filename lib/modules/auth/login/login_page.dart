@@ -223,7 +223,11 @@ class _LoginPageState extends State<LoginPage> {
       bloc: _loginBloc,
       listener: (context, estado) {
         if (estado is LoginSucesso) {
-          Navigator.pushReplacementNamed(context, '/home');
+          if (estado.primeiroAcesso) {
+            Navigator.pushReplacementNamed(context, '/alterar-senha');
+          } else {
+            Navigator.pushReplacementNamed(context, '/home');
+          }
         }
         if (estado is LoginErro) {
           CustomToast.show(

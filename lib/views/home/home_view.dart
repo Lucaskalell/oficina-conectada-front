@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:oficina_conectada_front/modules/dashboard/dashboard_page.dart';
 import 'package:oficina_conectada_front/views/estoque/estoque_view.dart';
 import 'package:oficina_conectada_front/modules/ordens/ordens_page.dart';
-import 'package:oficina_conectada_front/views/carro/carro_view.dart';
+import 'package:oficina_conectada_front/modules/veiculos/veiculos_page.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -32,7 +32,7 @@ class _HomeViewState extends State<HomeView> {
     const DashboardPage(), // 0
     const OrdensPage(), // 1
     const ClientesPage(), // 2
-    const VeiculosView(), // 3
+    const VeiculosPage(), // 3
     const EstoqueView(), // 4
     const Center(
       child: Text(

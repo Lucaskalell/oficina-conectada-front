@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:oficina_conectada_front/constants/colors.dart';
 import 'package:oficina_conectada_front/views/cliente/cliente_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:oficina_conectada_front/views/dashboard/dashboard_view.dart';
+import 'package:oficina_conectada_front/modules/dashboard/dashboard_page.dart';
 import 'package:oficina_conectada_front/views/estoque/estoque_view.dart';
 import 'package:oficina_conectada_front/views/ordem_de_servico/ordem_de_servico_view.dart';
 import 'package:oficina_conectada_front/views/carro/carro_view.dart';
@@ -29,7 +29,7 @@ class _HomeViewState extends State<HomeView> {
   final Color _textMuted = ColorsApp.textMuted;
 
   final List<Widget> _screens = [
-    const DashboardView(), // 0
+    const DashboardPage(), // 0
     const OrdemServicoView(), // 1
     const ClientesView(), // 2
     const VeiculosView(), // 3

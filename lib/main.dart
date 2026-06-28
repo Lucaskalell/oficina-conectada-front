@@ -5,7 +5,7 @@ import 'package:oficina_conectada_front/modules/auth/recuperar_senha/recuperar_s
 import 'package:oficina_conectada_front/views/home/home_view.dart';
 import 'package:oficina_conectada_front/views/carro/carro_view.dart';
 import 'package:oficina_conectada_front/views/cliente/cliente_view.dart';
-import 'package:oficina_conectada_front/views/dashboard/dashboard_view.dart';
+import 'package:oficina_conectada_front/modules/dashboard/dashboard_page.dart';
 import 'package:oficina_conectada_front/views/estoque/estoque_view.dart';
 import 'package:oficina_conectada_front/views/ordem_de_servico/ordem_de_servico_view.dart';
 
@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
         '/recuperar-senha': (context) => const RecuperarSenhaPage(),
         '/home': (context) => const HomeView(),
         '/estoque': (context) => const EstoqueView(),
-        '/dashboard': (context) => const DashboardView(),
+        '/dashboard': (context) => const DashboardPage(),
         '/ordemDeServico': (context) => const OrdemServicoView(),
         '/cliente': (context) => const ClientesView(),
         '/veiculo': (context) => const VeiculosView(),

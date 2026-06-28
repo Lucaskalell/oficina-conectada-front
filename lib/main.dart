@@ -4,7 +4,7 @@ import 'package:oficina_conectada_front/modules/auth/alterar_senha/alterar_senha
 import 'package:oficina_conectada_front/modules/auth/recuperar_senha/recuperar_senha_page.dart';
 import 'package:oficina_conectada_front/views/home/home_view.dart';
 import 'package:oficina_conectada_front/views/carro/carro_view.dart';
-import 'package:oficina_conectada_front/views/cliente/cliente_view.dart';
+import 'package:oficina_conectada_front/modules/clientes/clientes_page.dart';
 import 'package:oficina_conectada_front/modules/dashboard/dashboard_page.dart';
 import 'package:oficina_conectada_front/views/estoque/estoque_view.dart';
 import 'package:oficina_conectada_front/modules/ordens/ordens_page.dart';
@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
         '/estoque': (context) => const EstoqueView(),
         '/dashboard': (context) => const DashboardPage(),
         '/ordemDeServico': (context) => const OrdensPage(),
-        '/cliente': (context) => const ClientesView(),
+        '/cliente': (context) => const ClientesPage(),
         '/veiculo': (context) => const VeiculosView(),
       },
     );

@@ -30,6 +30,42 @@ class _OrdensPageState extends State<OrdensPage> {
 
   void _carregarDados() => _ordensBloc.add(CarregarOrdens());
 
+  Future<void> _confirmarDelecao(int id) async {
+    final confirmado = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.fundoCard,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: AppColors.borda),
+        ),
+        title: const Text('Excluir Ordem de Serviço', style: TextStyle(color: Colors.white, fontSize: 16)),
+        content: const Text(
+          'Tem certeza que deseja excluir esta OS? Esta ação não pode ser desfeita.',
+          style: TextStyle(color: Colors.white54, fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.erro,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+    if (confirmado == true) {
+      _ordensBloc.add(DeletarOrdem(id));
+    }
+  }
+
   void _aoClicarNovaOs() {
     Navigator.push(
       context,
@@ -340,7 +376,7 @@ class _OrdensPageState extends State<OrdensPage> {
                 const SizedBox(width: 8),
                 IconButton(
                   icon: const Icon(Icons.delete_outline, color: AppColors.erro, size: 18),
-                  onPressed: () => _ordensBloc.add(DeletarOrdem(ordem.id!)),
+                  onPressed: () => _confirmarDelecao(ordem.id!),
                   splashRadius: 20,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),

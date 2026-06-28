@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oficina_conectada_front/constants/colors.dart';
-import 'package:oficina_conectada_front/views/cliente/cliente_view.dart';
+import 'package:oficina_conectada_front/modules/clientes/clientes_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:oficina_conectada_front/modules/dashboard/dashboard_page.dart';
 import 'package:oficina_conectada_front/views/estoque/estoque_view.dart';
@@ -31,7 +31,7 @@ class _HomeViewState extends State<HomeView> {
   final List<Widget> _screens = [
     const DashboardPage(), // 0
     const OrdensPage(), // 1
-    const ClientesView(), // 2
+    const ClientesPage(), // 2
     const VeiculosView(), // 3
     const EstoqueView(), // 4
     const Center(

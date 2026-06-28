@@ -7,7 +7,7 @@ import 'package:oficina_conectada_front/views/carro/carro_view.dart';
 import 'package:oficina_conectada_front/views/cliente/cliente_view.dart';
 import 'package:oficina_conectada_front/modules/dashboard/dashboard_page.dart';
 import 'package:oficina_conectada_front/views/estoque/estoque_view.dart';
-import 'package:oficina_conectada_front/views/ordem_de_servico/ordem_de_servico_view.dart';
+import 'package:oficina_conectada_front/modules/ordens/ordens_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomeView(),
         '/estoque': (context) => const EstoqueView(),
         '/dashboard': (context) => const DashboardPage(),
-        '/ordemDeServico': (context) => const OrdemServicoView(),
+        '/ordemDeServico': (context) => const OrdensPage(),
         '/cliente': (context) => const ClientesView(),
         '/veiculo': (context) => const VeiculosView(),
       },

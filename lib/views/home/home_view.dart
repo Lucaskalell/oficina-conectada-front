@@ -4,7 +4,7 @@ import 'package:oficina_conectada_front/views/cliente/cliente_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:oficina_conectada_front/modules/dashboard/dashboard_page.dart';
 import 'package:oficina_conectada_front/views/estoque/estoque_view.dart';
-import 'package:oficina_conectada_front/views/ordem_de_servico/ordem_de_servico_view.dart';
+import 'package:oficina_conectada_front/modules/ordens/ordens_page.dart';
 import 'package:oficina_conectada_front/views/carro/carro_view.dart';
 
 class HomeView extends StatefulWidget {
@@ -30,7 +30,7 @@ class _HomeViewState extends State<HomeView> {
 
   final List<Widget> _screens = [
     const DashboardPage(), // 0
-    const OrdemServicoView(), // 1
+    const OrdensPage(), // 1
     const ClientesView(), // 2
     const VeiculosView(), // 3
     const EstoqueView(), // 4

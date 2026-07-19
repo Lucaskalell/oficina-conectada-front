@@ -3,7 +3,7 @@ import 'package:oficina_conectada_front/constants/colors.dart';
 import 'package:oficina_conectada_front/modules/clientes/clientes_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:oficina_conectada_front/modules/dashboard/dashboard_page.dart';
-import 'package:oficina_conectada_front/views/estoque/estoque_view.dart';
+import 'package:oficina_conectada_front/modules/estoque/estoque_page.dart';
 import 'package:oficina_conectada_front/modules/ordens/ordens_page.dart';
 import 'package:oficina_conectada_front/modules/veiculos/veiculos_page.dart';
 
@@ -33,7 +33,7 @@ class _HomeViewState extends State<HomeView> {
     const OrdensPage(), // 1
     const ClientesPage(), // 2
     const VeiculosPage(), // 3
-    const EstoqueView(), // 4
+    const EstoquePage(), // 4
     const Center(
       child: Text(
         'Página: Financeiro',

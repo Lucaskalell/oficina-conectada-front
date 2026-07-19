@@ -6,7 +6,7 @@ import 'package:oficina_conectada_front/views/home/home_view.dart';
 import 'package:oficina_conectada_front/modules/veiculos/veiculos_page.dart';
 import 'package:oficina_conectada_front/modules/clientes/clientes_page.dart';
 import 'package:oficina_conectada_front/modules/dashboard/dashboard_page.dart';
-import 'package:oficina_conectada_front/views/estoque/estoque_view.dart';
+import 'package:oficina_conectada_front/modules/estoque/estoque_page.dart';
 import 'package:oficina_conectada_front/modules/ordens/ordens_page.dart';
 
 void main() {
@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
         '/alterar-senha': (context) => const AlterarSenhaPage(),
         '/recuperar-senha': (context) => const RecuperarSenhaPage(),
         '/home': (context) => const HomeView(),
-        '/estoque': (context) => const EstoqueView(),
+        '/estoque': (context) => const EstoquePage(),
         '/dashboard': (context) => const DashboardPage(),
         '/ordemDeServico': (context) => const OrdensPage(),
         '/cliente': (context) => const ClientesPage(),

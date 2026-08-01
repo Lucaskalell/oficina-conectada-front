@@ -6,6 +6,7 @@ import 'package:oficina_conectada_front/modules/dashboard/dashboard_page.dart';
 import 'package:oficina_conectada_front/modules/estoque/estoque_page.dart';
 import 'package:oficina_conectada_front/modules/ordens/ordens_page.dart';
 import 'package:oficina_conectada_front/modules/veiculos/veiculos_page.dart';
+import 'package:oficina_conectada_front/modules/mecanicos/mecanicos_page.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -33,31 +34,32 @@ class _HomeViewState extends State<HomeView> {
     const OrdensPage(), // 1
     const ClientesPage(), // 2
     const VeiculosPage(), // 3
-    const EstoquePage(), // 4
+    const MecanicosPage(), // 4
+    const EstoquePage(), // 5
     const Center(
       child: Text(
         'Página: Financeiro',
         style: TextStyle(fontSize: 24, color: Colors.grey),
       ),
-    ), // 5
+    ), // 6
     const Center(
       child: Text(
         'Página: Agenda',
         style: TextStyle(fontSize: 24, color: Colors.grey),
       ),
-    ), // 6
+    ), // 7
     const Center(
       child: Text(
         'Página: Chat',
         style: TextStyle(fontSize: 24, color: Colors.grey),
       ),
-    ), // 7
+    ), // 8
     const Center(
       child: Text(
         'Página: Configuração',
         style: TextStyle(fontSize: 24, color: Colors.grey),
       ),
-    ), // 8
+    ), // 9
   ];
 
   void _onScreenSelected(int index, String titulo) {
@@ -123,7 +125,9 @@ class _HomeViewState extends State<HomeView> {
               backgroundColor: _primaryColor,
               foregroundColor: Colors.white,
               elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
               padding: const EdgeInsets.symmetric(horizontal: 16),
             ),
             onPressed: () {
@@ -154,17 +158,16 @@ class _HomeViewState extends State<HomeView> {
         backgroundImage: const AssetImage('assets/images/tomioka.png'),
         backgroundColor: _cardDark,
       ),
-      itemBuilder:
-          (BuildContext context) => <PopupMenuEntry<String>>[
-            const PopupMenuItem<String>(
-              value: 'perfil',
-              child: Text('Ver Perfil', style: TextStyle(color: Colors.white)),
-            ),
-            const PopupMenuItem<String>(
-              value: 'sair',
-              child: Text('Sair', style: TextStyle(color: Colors.redAccent)),
-            ),
-          ],
+      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+        const PopupMenuItem<String>(
+          value: 'perfil',
+          child: Text('Ver Perfil', style: TextStyle(color: Colors.white)),
+        ),
+        const PopupMenuItem<String>(
+          value: 'sair',
+          child: Text('Sair', style: TextStyle(color: Colors.redAccent)),
+        ),
+      ],
     );
   }
 
@@ -217,16 +220,27 @@ class _HomeViewState extends State<HomeView> {
               children: [
                 _buildSectionTitle('PRINCIPAL'),
                 _buildNavItem(0, 'Dashboard', Icons.grid_view_rounded),
-                _buildNavItem(1, 'Ordens de Serviço', Icons.assignment_outlined, badge: 12),
+                _buildNavItem(
+                  1,
+                  'Ordens de Serviço',
+                  Icons.assignment_outlined,
+                  badge: 12,
+                ),
                 _buildNavItem(2, 'Clientes', Icons.people_outline),
                 _buildNavItem(3, 'Veículos', Icons.directions_car_outlined),
-                _buildNavItem(4, 'Estoque', Icons.inventory_2_outlined, badge: 3),
-                _buildNavItem(5, 'Financeiro', Icons.attach_money_outlined),
-                _buildNavItem(6, 'Agenda', Icons.calendar_today_outlined),
-                _buildNavItem(7, 'Chat', Icons.chat_bubble_outline),
+                _buildNavItem(4, 'Mecânicos', Icons.build_outlined),
+                _buildNavItem(
+                  5,
+                  'Estoque',
+                  Icons.inventory_2_outlined,
+                  badge: 3,
+                ),
+                _buildNavItem(6, 'Financeiro', Icons.attach_money_outlined),
+                _buildNavItem(7, 'Agenda', Icons.calendar_today_outlined),
+                _buildNavItem(8, 'Chat', Icons.chat_bubble_outline),
                 const SizedBox(height: 16),
                 _buildSectionTitle('SISTEMA'),
-                _buildNavItem(8, 'Configurações', Icons.settings_outlined),
+                _buildNavItem(9, 'Configurações', Icons.settings_outlined),
               ],
             ),
           ),
@@ -237,7 +251,9 @@ class _HomeViewState extends State<HomeView> {
               children: [
                 CircleAvatar(
                   radius: 18,
-                  backgroundImage: const AssetImage('assets/images/tomioka.png'),
+                  backgroundImage: const AssetImage(
+                    'assets/images/tomioka.png',
+                  ),
                   backgroundColor: _cardDark,
                 ),
                 const SizedBox(width: 12),
@@ -262,7 +278,11 @@ class _HomeViewState extends State<HomeView> {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.logout, color: Colors.redAccent, size: 20),
+                  icon: const Icon(
+                    Icons.logout,
+                    color: Colors.redAccent,
+                    size: 20,
+                  ),
                   onPressed: _handleLogout,
                   splashRadius: 20,
                 ),
@@ -312,24 +332,23 @@ class _HomeViewState extends State<HomeView> {
         ),
         tileColor: isSelected ? _cardDark : Colors.transparent,
         hoverColor: _cardDark.withOpacity(0.5),
-        trailing:
-            badge != null
-                ? Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: _primaryColor.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(10),
+        trailing: badge != null
+            ? Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: _primaryColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  badge.toString(),
+                  style: TextStyle(
+                    color: _primaryColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
                   ),
-                  child: Text(
-                    badge.toString(),
-                    style: TextStyle(
-                      color: _primaryColor,
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                )
-                : null,
+                ),
+              )
+            : null,
         onTap: () => _onScreenSelected(index, title),
       ),
     );
@@ -338,41 +357,40 @@ class _HomeViewState extends State<HomeView> {
   Widget _buildBody() {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
-      child:
-          _selectedIndex == -1
-              ? Container(
-                key: const ValueKey('HomeImage'),
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/homesemmarca.png'),
-                    fit: BoxFit.cover,
-                  ),
+      child: _selectedIndex == -1
+          ? Container(
+              key: const ValueKey('HomeImage'),
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/homesemmarca.png'),
+                  fit: BoxFit.cover,
                 ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.bottomCenter,
-                      end: Alignment.topCenter,
-                      colors: [Colors.black.withOpacity(0.9), Colors.transparent],
-                    ),
-                  ),
-                  alignment: Alignment.bottomLeft,
-                  padding: const EdgeInsets.all(40),
-                  child: const Text(
-                    'Bem-vindo, Kalell',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 36,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              )
-              : Container(
-                key: ValueKey('Content_$_selectedIndex'),
-                color: _bgDark,
-                child: _screens[_selectedIndex],
               ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [Colors.black.withOpacity(0.9), Colors.transparent],
+                  ),
+                ),
+                alignment: Alignment.bottomLeft,
+                padding: const EdgeInsets.all(40),
+                child: const Text(
+                  'Bem-vindo, Kalell',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            )
+          : Container(
+              key: ValueKey('Content_$_selectedIndex'),
+              color: _bgDark,
+              child: _screens[_selectedIndex],
+            ),
     );
   }
 
@@ -383,24 +401,22 @@ class _HomeViewState extends State<HomeView> {
       key: _scaffoldKey,
       backgroundColor: _bgDark,
       appBar: _buildAppBar(),
-      drawer:
-          isMobile
-              ? Drawer(backgroundColor: _sidebarDark, child: _buildDrawer())
-              : null,
-      body:
-          isMobile
-              ? _buildBody()
-              : Row(
-                children: [
-                  _buildDrawer(),
-                  VerticalDivider(
-                    thickness: 1,
-                    width: 1,
-                    color: Colors.white.withOpacity(0.05),
-                  ),
-                  Expanded(child: _buildBody()),
-                ],
-              ),
+      drawer: isMobile
+          ? Drawer(backgroundColor: _sidebarDark, child: _buildDrawer())
+          : null,
+      body: isMobile
+          ? _buildBody()
+          : Row(
+              children: [
+                _buildDrawer(),
+                VerticalDivider(
+                  thickness: 1,
+                  width: 1,
+                  color: Colors.white.withOpacity(0.05),
+                ),
+                Expanded(child: _buildBody()),
+              ],
+            ),
     );
   }
 }

@@ -5,6 +5,7 @@ import 'package:oficina_conectada_front/modules/auth/recuperar_senha/recuperar_s
 import 'package:oficina_conectada_front/views/home/home_view.dart';
 import 'package:oficina_conectada_front/modules/veiculos/veiculos_page.dart';
 import 'package:oficina_conectada_front/modules/mecanicos/mecanicos_page.dart';
+import 'package:oficina_conectada_front/modules/agendamento/agendamento_page.dart';
 import 'package:oficina_conectada_front/modules/clientes/clientes_page.dart';
 import 'package:oficina_conectada_front/modules/dashboard/dashboard_page.dart';
 import 'package:oficina_conectada_front/modules/estoque/estoque_page.dart';
@@ -37,6 +38,7 @@ class MyApp extends StatelessWidget {
         '/cliente': (context) => const ClientesPage(),
         '/veiculo': (context) => const VeiculosPage(),
         '/mecanico': (context) => const MecanicosPage(),
+        '/agendamento': (context) => const AgendamentoPage(),
       },
     );
   }

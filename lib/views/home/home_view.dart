@@ -7,6 +7,7 @@ import 'package:oficina_conectada_front/modules/estoque/estoque_page.dart';
 import 'package:oficina_conectada_front/modules/ordens/ordens_page.dart';
 import 'package:oficina_conectada_front/modules/veiculos/veiculos_page.dart';
 import 'package:oficina_conectada_front/modules/mecanicos/mecanicos_page.dart';
+import 'package:oficina_conectada_front/modules/agendamento/agendamento_page.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -42,12 +43,7 @@ class _HomeViewState extends State<HomeView> {
         style: TextStyle(fontSize: 24, color: Colors.grey),
       ),
     ), // 6
-    const Center(
-      child: Text(
-        'Página: Agenda',
-        style: TextStyle(fontSize: 24, color: Colors.grey),
-      ),
-    ), // 7
+    const AgendamentoPage(), // 7
     const Center(
       child: Text(
         'Página: Chat',

@@ -42,7 +42,13 @@ class ApiClient{
     final jsonBody = jsonEncode(body);
     return _client.put(url, headers: headers, body: jsonBody);
   }
-  
+
+  Future<http.Response>patch(String endPoint, {dynamic body})async{
+    final url = Uri.parse('${ApiConstants.baseUrl}$endPoint');
+    final headers = await _getAuthHeaders();
+    return _client.patch(url, headers: headers, body: body != null ? jsonEncode(body) : null);
+  }
+
   Future<http.Response>delete(String endPoint)async{
     final url = Uri.parse('${ApiConstants.baseUrl}$endPoint');
     final headers = await _getAuthHeaders();
